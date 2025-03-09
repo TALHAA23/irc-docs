@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/*globals.css or your component css file*/
+.callout {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.callout-info {
+  background-color: #e0f7fa;
+  border-color: #b2ebf2;
+}
