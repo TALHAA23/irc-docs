@@ -1,24 +1,13 @@
-import { ComponentPropsWithoutRef } from "react";
-import type { MDXComponents } from "mdx/types";
-import { highlight } from "sugar-high";
-type HeadingProps = ComponentPropsWithoutRef<"h1">;
+import { useMDXComponents as getThemeComponents } from "nextra-theme-docs"; // nextra-theme-blog or your custom theme
+import { MDXComponents } from "nextra/mdx-components";
 
-const components: MDXComponents = {
-  h1: (props: HeadingProps) => (
-    <h1 className="text-red-500 font-bold text-5xl" {...props} />
-  ),
-  h2: (props: ComponentPropsWithoutRef<"h2">) => <h2 {...props} />,
-  code: ({ children, ...props }: ComponentPropsWithoutRef<"code">) => {
-    const codeHTML = highlight(children as string);
-    return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />;
-  },
-};
+// Get the default MDX components
+const themeComponents = getThemeComponents();
 
-export function useMDXComponents(
-  otherComponents: MDXComponents
-): MDXComponents {
+// Merge components
+export function useMDXComponents(components: MDXComponents) {
   return {
-    ...otherComponents,
+    ...themeComponents,
     ...components,
   };
 }

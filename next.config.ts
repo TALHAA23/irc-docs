@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
-// import withMarkdoc from "@markdoc/next.js";
-import createMdx from "@next/mdx";
-// module.exports = withMarkdoc(/* options */)({
-//   pageExtensions: ["md", "mdoc", "js", "jsx", "ts", "tsx"],
-// });
+import nextra from "nextra";
+
+const withNextra = nextra({});
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -12,6 +10,5 @@ const nextConfig: NextConfig = {
     mdxRs: true,
   },
 };
-const withmdx = createMdx({});
 
-export default withmdx(nextConfig);
+export default withNextra(nextConfig);
