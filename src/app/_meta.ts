@@ -1,4 +1,9 @@
-export default {
-  index: "Home", // Change the label to "Home"
-  // ... other entries ...
+import type { MetaRecord } from "nextra";
+
+const meta: MetaRecord = {
+  index: {
+    display: "hidden",
+  },
 };
+
+export default meta;

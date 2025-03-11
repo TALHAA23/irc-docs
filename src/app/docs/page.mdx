@@ -1,4 +1,53 @@
 # Introduction
 
-This is the IRC library.
+import { packageRegistriesOptions } from "@/utils/utils";
+import CodeBlock from "@components/CodeBlock";
 
+### Transform your React applications with AI-powered, prompt-driven components.
+
+## What is Intelligent React Components?
+
+Intelligent React Components is a library that bridges the gap between traditional React development and AI capabilities. It enhances standard HTML elements like buttons, forms, and inputs by integrating them with AI functionality, creating a seamless development experience that lets you harness the power of AI without leaving your React workflow.
+
+## How It Works
+
+The library takes familiar React components and supercharges them with AI capabilities:
+
+1. You provide a prompt describing the desired functionality
+2. The component sends the prompt to an AI model such as Gemini API.
+3. The AI generates code based on your instructions
+4. The library pre-processes the response and creates all necessary files
+5. Event handlers and initialization functions are automatically attached
+
+## Features
+
+1. ### 🧠 Prompt-Driven Development
+
+Write natural language prompts to describe what you want your component to do:
+
+```jsx
+<AIButton 
+  prompt="When clicked, fetch user data from the API and display it in a formatted table"
+  filename="fetchUserData"
+  listener="onClick"
+>
+  Load Users
+</AIButton>
+```
+
+2. ### 🔄 Codebase Integration
+The library can interact with your existing code, including:
+
+React state variables
+Functions and callbacks
+Database operations
+Environment variables
+
+3. ### 🔥 Cloud-base Databases Integration
+Built-in support for Firebase and Supabase operations.
+
+4. ### 🔄 State Management
+Easily update React state based on AI-generated logic.
+
+5. ### 🪝 Callback System
+Execute your own functions when specific conditions are met.

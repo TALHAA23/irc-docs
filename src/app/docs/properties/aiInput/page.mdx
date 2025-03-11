@@ -1,0 +1,30 @@
+import CodeBlock from "@components/CodeBlock";
+import Notes from "@components/Note";
+import PropertiesHeading from "@components/PropertiesHeading";
+
+# AI Input Properties
+
+This page documents the specific properties available for the `AIInput` component. These properties control how input elements interact with AI capabilities and extend the [common](./common) properties shared across all intelligent components.
+The properties for AIInput allow you to configure how user input is processed, validated, and transformed using AI-generated logic, creating enhanced form fields that go beyond standard HTML inputs.
+
+<PropertiesHeading required={true}>
+## type
+</PropertiesHeading>
+
+**Type:** `React.HTMLInputTypeAttribute`
+**Default Value**: `text`
+
+### Description
+
+Specifies the type of input field to render. This accepts all standard HTML input types, such as text, password, email, number, tel, date, etc.
+
+### Useage
+
+```jsx {5} 
+<AIInput
+  prompt="Check password strength and show feedback"
+  filename="passwordStrength"
+  listener="onChange"
+  type="password"
+/>
+```

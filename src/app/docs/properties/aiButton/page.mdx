@@ -1,0 +1,31 @@
+import CodeBlock from "@components/CodeBlock";
+import Notes from "@components/Note";
+import PropertiesHeading from "@components/PropertiesHeading";
+
+# AI Button Properties
+
+This page documents the specific properties available for the AIButton component. These properties control how button elements interact with AI capabilities and extend the [common](./common) properties shared across all intelligent components.
+The properties for AIButton allow you to configure how user interactions trigger AI-generated functionality, creating enhanced buttons that can perform complex operations with simple natural language prompts.
+
+<PropertiesHeading>
+## label
+</PropertiesHeading>
+
+**Type:** string
+
+**Default Value:** AIButton
+
+### Description
+
+Specifies the text content to display inside the button. This provides an alternative to using children for setting the button text.
+
+### Usage
+
+```jsx {5} filename="AIButton"
+<AIButton
+  prompt="Fetch user data from API when clicked"
+  filename="fetchUsers"
+  listener="onClick"
+  label="Load Users"
+/>
+```

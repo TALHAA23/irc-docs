@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* notes */
+  --infoBorderColor: rgb(30 64 175);
+  --infoBg: rgba(98, 135, 177, 0.685);
+  --infoTextColor: rgb(0, 23, 84);
 }
 
 @theme inline {
@@ -36,4 +40,10 @@ body {
 
 .normal-heading {
   @apply font-bold text-2xl sm:text-4xl;
+}
+
+.info {
+  color: var(--infoTextColor);
+  background-color: var(--infoBg);
+  border: 2px solid var(--infoBorderColor);
 }

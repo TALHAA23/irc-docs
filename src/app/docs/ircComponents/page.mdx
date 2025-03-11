@@ -1,0 +1,94 @@
+import Notes from "@components/Note"
+
+# IRC Components
+
+This section details the components provided by the Intelligent React Components library, each designed to integrate AI capabilities into your React applications.
+
+We deliver the following components:
+
+- [AIButton](./properties/aiButton)
+- [AIInput](./properties/aiInput)
+- [AIForm](./properties/aiForm)
+
+## AIButton
+
+A button component that leverages AI to generate and execute custom functionality based on natural language prompts.
+
+The `AIButton` component allows you to create interactive buttons that dynamically generate and execute JavaScript code based on natural language prompts. When clicked, the AIButton sends your prompt to the AI model ([Gemini API](https://aistudio.google.com/welcome?gad_source=1&gclid=CjwKCAjwvr--BhB5EiwAd5YbXseE2equX4Fr87yc0-V8KVkS0Mj7I7R5MgpcgJ11jsbLJR3oGh3QuhoCkhwQAvD_BwE)), which generates code to perform actions like fetching data, manipulating the DOM, or triggering other events. You can specify event listeners (e.g., onClick) and provide supporting properties for context.
+
+### Example
+
+```jsx filename="weatherButton" copy
+<AIButton
+  prompt="Fetch current weather from _apiUrl for $CITY and display it in an alert"
+  filename="weatherButton"
+  listener="onClick"
+  supportingProps={{
+    utils: { $CITY: "London" },
+    variables: { apiUrl: "https://api.weather.com" }
+  }}
+>
+  Get Weather
+</AIButton>
+```
+
+<Notes note="info">
+- `$` is used to refer `utils`
+- `_` is used to refer `variables`
+- `&` is used to refer `mutation`
+</Notes>
+
+## AIInput
+
+An input component that integrates AI to enhance input processing, validation, and dynamic behavior based on natural language prompts.
+
+The `AIInput` component provides enhanced input fields that use AI to generate dynamic behavior, such as real-time input validation, data transformation, or dynamic event handling. You provide prompts describing the desired input behavior, and the AI generates the necessary JavaScript code to implement it. It supports various event listeners (e.g., `onChange`, `onBlur`) and integrates with other library features like `mutation` and `callbacks`.
+
+### Example
+
+```jsx filename="emailInput" copy
+<AIInput
+  prompt="Validate email input and display an error message if invalid"
+  filename="emailInput"
+  listener="onChange"
+  validate="Must be a valid email address"
+  callbacks={{
+    dependent: [{
+        callGuide: "If email is invalid",
+        parametersGuide: ["error message"],
+        callback: (message) => alert(message)
+    }]
+  }}
+/>
+```
+
+## AIForm
+
+A form component that uses AI to dynamically generate form fields, handle validation, and process submissions based on natural language prompts.
+
+The `AIForm` component simplifies form creation by using AI to generate form fields and handle form logic based on natural language prompts. You define the form's purpose and structure through prompts and `fieldDefinitions`, and the AI generates the necessary HTML input elements, validation logic, and submission handling. It supports multi-step forms, layout customization, and style hints.
+
+### Example
+
+```jsx filename="userRegistration" copy
+<AIForm
+  prompt="Create a user registration form."
+  filename="userRegistration"
+  fieldDefinitions={[
+    {
+      id: "username",
+      fieldDefination: "Username input field",
+      validate: "Required, minimum 3 characters",
+      layout: "full-width",
+      styleHint: "outlined",
+    },
+    {
+      id: "email",
+      fieldDefination: "Email input field",
+      validate: "Must be a valid email address",
+      layout: "full-width",
+      styleHint: "outlined",
+    },
+  ]}
+/>
+```

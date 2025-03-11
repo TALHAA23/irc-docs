@@ -1,0 +1,771 @@
+import PropertiesHeading from "@components/PropertiesHeading";
+import CodeBlock from "@components/CodeBlock";
+import { aiComponentNames } from "@/utils/utils";
+import Notes from "@components/Note"
+
+# Common Properties
+
+This page documents the common properties that can be used with any Intelligent React Components - whether you're working with AIButton, AIInput, or AIForm. These core properties control how components interact with the AI.
+
+<PropertiesHeading required={true}>
+## prompt
+</PropertiesHeading>
+
+**Type**: `string`
+
+**Default Value**: None
+
+### Description
+
+The prompt property is a string that contains the instructions for the AI model (Gemini API). This is the core of Intelligent React Components - your natural language instructions telling the AI what code to generate and what functionality to implement.
+Your prompt should clearly describe:
+
+- What the component should do
+- When it should do it (usually tied to the event in listener)
+- How it should handle any data
+- What interactions it should have with other parts of your application
+
+### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {2-3} filename="AIButton" copy
+<AIButton
+  prompt="When clicked, fetch a random joke from https://api.example.com/jokes 
+          and display it in #jokeDisplay. Handle loading and error states."
+  filename="jokeGenerator"
+  listener="onClick"
+>
+  Get Random Joke
+</AIButton>
+```
+
+```jsx {2-4} filename="AIInput" copy
+<AIInput 
+  prompt="Validate this input as an email address. Show an error message 
+          if the format is invalid. The input should turn red when invalid 
+          and green when valid."
+  filename="emailValidator"
+  listener="onChange"
+  attributes={{ placeholder: "Enter email" }}
+/>
+```
+```jsx {2-4} filename="AIForm" copy
+<AIForm
+  prompt="When submitted, validate all fields (name, email, message). 
+          If valid, send the data to https://api.example.com/contact 
+          as a POST request. Show a success message on completion."
+  filename="contactForm"
+  listener="onSubmit"
+>
+</AIForm>
+```
+</CodeBlock>
+
+
+<PropertiesHeading required={true}>
+## filename
+</PropertiesHeading>
+
+**Type**: `string`
+
+**Default Value**: None
+
+
+### Description
+
+The unique name (without extension) for the file that will store the AI-generated code. This name is used to dynamically import the AI logic when needed.
+
+### Usage
+
+```jsx {4} filename="AIButton" copy
+<AIButton
+  prompt="When clicked, show a confetti animation"
+  filename="confettiButton"
+  listener="onClick"
+>
+  Celebrate!
+</AIButton>
+```
+
+<PropertiesHeading required={true} >
+## type
+</PropertiesHeading>
+
+
+**Type**: `keyof React.DOMAttributes<React.ReactHTMLElement>`
+
+**Default Value**: `onClick`, `onChange`, or `onSubmit`
+
+### Description
+Specifies which event will trigger the AI-generated code. This property accepts standard React event names like onClick, onChange, onSubmit, onBlur, etc.
+
+### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {4} filename="AIButton" copy
+<AIButton
+  prompt="Generate random color and apply to background"
+  filename="colorChanger"
+  listener="onClick"
+>
+  Change Color
+</AIButton>
+```
+```jsx {4} filename="AIInput" copy
+<AIInput
+  prompt="Validate credit card number as user types"
+  filename="creditCardValidator"
+  listener="onChange"
+  attributes={{ placeholder: "Enter card number" }}
+/>
+```
+```jsx {4} filename="AIForm" copy
+<AIForm
+  prompt="Validate and process form submission"
+  filename="formProcessor"
+  listener="onSubmit"
+/>
+```
+</CodeBlock>
+
+<PropertiesHeading >
+## attributes
+</PropertiesHeading>
+
+**Type**: `Target (Component-specific HTML attributes)`
+
+**Default Value**: `{}`
+
+### Description
+Passes standard HTML attributes to the underlying element such as className, id, placeholder, style, etc.
+
+### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {5-9} filename="AIButton" copy
+<AIButton
+  prompt="Fetch data when clicked"
+  filename="dataFetcher"
+  listener="onClick"
+  attributes={{
+    className: "primary-btn",
+    id: "fetch-data-btn",
+    disabled: isLoading
+  }}
+>
+  Fetch Data
+</AIButton>
+```
+```jsx {5-9} filename="AIInput" copy
+<AIInput
+  prompt="Validate email input"
+  filename="emailValidator"
+  listener="onChange"
+  attributes={{
+    placeholder: "Enter your email",
+    className: "form-input",
+    autoComplete: "email"
+  }}
+/>
+```
+```jsx {5-8} filename="AIForm" copy
+<AIForm
+  prompt="Process form submission"
+  filename="submitHandler"
+  listener="onSubmit"
+  attributes={{
+    className: "contact-form",
+    id: "contact-us"
+  }}
+>
+  {/* Form fields */}
+</AIForm>
+```
+</CodeBlock>
+
+<PropertiesHeading>
+## supportingProps
+</PropertiesHeading>
+
+**Type**: `object`
+
+**Default Value**: `undefined`
+
+### Description
+An object containing additional context and information that helps the AI understand your application environment and generate more accurate, contextually relevant code. This enables the AI to work with external services, databases, and existing variables in your codebase.
+
+`supportingProps` can have the following possible values:
+
+<PropertiesHeading>
+### supportingProps.utils
+</PropertiesHeading>
+
+**Type**: `{ [key: string]: any }`
+
+**Default Value**: `undefined`
+
+#### Description
+Key-value pairs where keys are placeholders in the prompt (prefixed with $) and values are their actual content. This allows you to externalize values from your prompt for cleaner, more maintainable code.
+
+<Notes note="info">
+prefix utils with `$` to better Usage.
+</Notes>
+
+#### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {6-9} filename="AIButton" copy
+<AIButton
+  prompt="When clicked, fetch weather data from $WEATHER_API for $CITY"
+  filename="weatherFetcher"
+  listener="onClick"
+  supportingProps={{
+    utils: {
+      $WEATHER_API: "https://api.weatherservice.com/v1/current",
+      $CITY: userLocation
+    }
+  }}
+>
+  Get Weather
+</AIButton>
+```
+```jsx {6-9} filename="AIInput" copy
+<AIInput
+  prompt="Validate this input against $PATTERN and show $ERROR_MESSAGE if invalid"
+  filename="patternValidator"
+  listener="onChange"
+  supportingProps={{
+    utils: {
+      $PATTERN: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+      $ERROR_MESSAGE: "Please enter a valid email address"
+    }
+  }}
+/>
+```
+```jsx {6-12} filename="AIForm" copy
+<AIForm
+  prompt="Submit form data to $ENDPOINT with $HEADERS"
+  filename="apiSubmitter"
+  listener="onSubmit"
+  supportingProps={{
+    utils: {
+      $ENDPOINT: "https://api.myapp.com/submit",
+      $HEADERS: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    }
+  }}
+/>
+```
+</CodeBlock>
+
+<PropertiesHeading>
+### supportingProps.database
+</PropertiesHeading>
+
+**Type**: `{ name: string; envGuide?: string; }`
+
+**Default Value**: `undefined`
+
+#### Description
+
+Used when the prompt involves database operations. This property provides context to the AI about the type of database interaction and how to handle sensitive information.
+
+- **name:** Specifies the type of database operation (e.g., "firebase", "firebase authentication", "supabase"). This helps the AI understand the required libraries and syntax.
+- **envGuide:** (Optional) Provides guidance on how the AI should access environment variables or secrets necessary for database connections. This is crucial for security.
+
+#### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {6-9} filename="AIButton" copy
+<AIButton
+  prompt="Fetch user data from Firebase where email is _email"
+  filename="fetchUserData"
+  listener="onClick"
+  supportingProps={{
+    database: {
+      name: "firebase",
+      envGuide: "Use process.env.FIREBASE_CONFIG for Firebase configuration."
+    },
+    variables: {
+        email: "[email address]"
+    }
+  }}
+>
+  Fetch User Data
+</AIButton>
+```
+```jsx {6-9} filename="AIInput" copy
+<AIInput
+  prompt="Query supabase for documents matching _query"
+  filename="supabaseQuery"
+  listener="onChange"
+  supportingProps={{
+    database: {
+      name: "supabase",
+      envGuide: "Use NEXT_PUBLIC_SUPABASE_ANON_KEY and NEXT_PUBLIC_SUPABASE_URL for the connection"
+    },
+    variables: {
+        query: "{ status: 'active' }"
+    }
+  }}
+/>
+```
+```jsx {6-9} filename="AIForm" copy
+<AIForm
+  prompt="Authenticate user with _email and _password using Firebase Authentication"
+  filename="userAuth"
+  listener="onSubmit"
+  supportingProps={{
+    database: {
+      name: "firebase authentication",
+      envGuide: "Access credentials via process.env.FIREBASE_AUTH_USER and process.env.FIREBASE_AUTH_PASSWORD."
+    },
+    variables: {
+        email: "",
+        password: ""
+    }
+  }}
+/>
+```
+</CodeBlock>
+
+<Notes note="info">
+Only `firebase` and `supabase` is supported.
+</Notes>
+
+<PropertiesHeading>
+### supportingProps.variables
+</PropertiesHeading>
+
+**Type**: `{ [key: string]: any }`
+
+**Default Value**: `undefined`
+
+#### Description
+
+Stores context from your codebase for use in AI-generated code. Variables in the prompt are prefixed with _ (e.g., _list).
+
+#### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {6-9} filename="AIButton" copy
+<AIButton
+  prompt="Add _newItem to _list and update state"
+  filename="addItem"
+  listener="onClick"
+  supportingProps={{
+    variables: {
+      list: [],
+      newItem: "New Item"
+    }
+  }}
+/>
+```
+```jsx {6-9} filename="AIInput" copy
+<AIInput
+    prompt="Validate if _inputValue is greater than _threshold"
+    filename="validateInput"
+    listener="onChange"
+    supportingProps={{
+        variables: {
+            inputValue: "",
+            threshold: 10
+        }
+    }}
+/>
+```
+```jsx {6-8} filename="AIForm" copy
+<AIForm
+    prompt="Send _formData to the server"
+    filename="submitForm"
+    listener="onSubmit"
+    supportingProps={{
+        variables: {
+            formData: { name: "John Doe", age: 30 }
+        }
+    }}
+/>
+```
+</CodeBlock>
+
+<PropertiesHeading>
+## mutation
+</PropertiesHeading>
+
+**Type**: `{ id: string; returnFormat: any; mutate: any; mutationType?: "callback" | "assignment"; }[]`
+
+**Default Value**: `undefined`
+
+### Description
+
+mutation is an array of objects. Each object tells the AI how to change data in your app after it generates code. This is useful for updating state or variables.
+
+- **id:** A unique name for this change.
+- **returnFormat**: The shape of the data that will be changed. For example, if you're updating a state that's an object, show the object's structure.
+- **mutate**: The thing that will do the change. If you're updating state, pass the setState function. If you're changing a variable, pass the variable itself.
+- **mutationType**: How to apply the change:
+    - **`"callback"`**: Calls mutate like a function.
+    - **`"assignment"`**: Changes mutate with an equals sign (=).
+
+### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {7-14} filename="AIButton" copy
+const [count, setCount] = useState(0);
+
+<AIButton
+  prompt="Increment count by 1"
+  filename="incrementer"
+  listener="onClick"
+  mutation={[
+    {
+      id: "updateCount",
+      returnFormat: 0, // Expecting a number
+      mutate: setCount,
+      mutationType: "callback"
+    }
+  ]}
+/>
+```
+```jsx {7-14} filename="AIInput" copy
+let message = "Hello";
+
+<AIInput
+  prompt="Set message to input value"
+  filename="messageUpdater"
+  listener="onChange"
+  mutation={[
+    {
+      id: "updateMessage",
+      returnFormat: "string", // Expecting a string
+      mutate: message,
+      mutationType: "assignment"
+    }
+  ]}
+/>
+```
+```jsx {12-19} filename="AIForm" copy
+const [user, setUser] = useState({ name: "John", age: 30 });
+
+<AIButton
+  prompt="Change user's name to _newName"
+  filename="nameChanger"
+  listener="onClick"
+  supportingProps = {{
+    variables : {
+        newName: "Jane"
+    }
+  }}
+  mutation={[
+    {
+      id: "updateUserName",
+      returnFormat: { name: "string", age: 30 }, // Expecting an object with name and age
+      mutate: setUser,
+      mutationType: "callback"
+    }
+  ]}
+/>
+```
+</CodeBlock>
+
+<PropertiesHeading >
+## callbacks
+</PropertiesHeading>
+
+**Type**: `{ independent?: { callGuide: string; callback: T; }[]; dependent?: { callGuide: string; parametersGuide: string[]; callback: T; }[]; [key: string]: any; }`
+
+**Default Value**: `undefined`
+
+### Description
+
+`callbacks` is an object that holds functions the AI-generated code should run when certain things happen. It lets you define functions that run without arguments (independent) or with data from the AI (dependent).
+
+<PropertiesHeading>
+### callbacks.independent
+</PropertiesHeading>
+
+**Type**: `{ callGuide: string; callback: T; }[]`
+
+**Default Value**: `undefined`
+
+#### Description
+An array of functions that the AI-generated code should call. These functions do not require any arguments from the AI.
+
+#### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {10-15} filename="AIButton" copy
+const logMessage = () => {
+  console.log("Button clicked!");
+};
+
+<AIButton
+  prompt="Log a message when clicked"
+  filename="loggerButton"
+  listener="onClick"
+  callbacks={{
+    independent: [
+      {
+        callGuide: "When the button is clicked",
+        callback: logMessage,
+      },
+    ],
+  }}
+>
+  Log Message
+</AIButton>
+```
+```jsx {11-16} filename="AIInput" copy
+const sendAnalytics = () => {
+  // Logic to send analytics data
+  console.log("Analytics sent");
+};
+
+<AIInput
+    prompt="Send analytics when input blurred"
+    filename="analyticsInput"
+    listener="onBlur"
+    callbacks={{
+        independent: [
+            {
+                callGuide: "When the input loses focus",
+                callback: sendAnalytics
+            }
+        ]
+    }}
+/>
+```
+```jsx {10-15} filename="AIForm" copy
+const showNotification = () => {
+    alert("Form submitted successfully!");
+};
+
+<AIForm
+    prompt="Show a notification on form submit"
+    filename="formNotifier"
+    listener="onSubmit"
+    callbacks={{
+        independent: [
+            {
+                callGuide: "After the form is successfully submitted",
+                callback: showNotification
+            }
+        ]
+    }}
+/>
+```
+</CodeBlock>
+
+<Notes note="info">
+You can also send `arrow` function directly .i.e:
+```js
+{
+    callback:()=> console.log('Hello world')
+}
+```
+</Notes>
+
+<PropertiesHeading>
+### callbacks.dependent
+</PropertiesHeading>
+
+**Type**: `{ callGuide: string; parametersGuide: string[]; callback: T; }[]`
+
+**Default Value**: `undefined`
+
+#### Description
+
+An array of functions that the AI-generated code should call. These functions require data from the AI-generated code as arguments
+
+#### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {10-16} filename="AIButton" copy
+const displayResult = (result) => {
+  alert(`Result: ${result}`);
+};
+
+<AIButton
+  prompt="Calculate the square of the input and display it"
+  filename="squareCalculator"
+  listener="onClick"
+  callbacks={{
+    dependent: [
+      {
+        callGuide: "After calculating the square",
+        parametersGuide: ["The result of the square calculation"],
+        callback: displayResult,
+      },
+    ],
+  }}
+/>
+```
+```jsx {11-17} filename="AIInput" copy
+const updateUI = (newData, message) => {
+    console.log("New Data:", newData);
+    console.log("Message:", message);
+    // Logic to update UI with newData and message
+};
+
+<AIInput
+    prompt="Fetch data from API and update UI with the result and a message"
+    filename="dataUpdater"
+    listener="onBlur"
+    callbacks={{
+        dependent: [
+            {
+                callGuide: "After fetching the data",
+                parametersGuide: ["The fetched data", "A message describing the result"],
+                callback: updateUI
+            }
+        ]
+    }}
+/>
+```
+```jsx {11-17} filename="AIForm" copy
+const processFormData = (formData) => {
+    console.log("Form Data:", formData);
+    // Logic to process the form data
+};
+
+<AIForm
+    prompt="Process the form data and log it"
+    filename="formDataProcessor"
+    listener="onSubmit"
+    callbacks={{
+        dependent: [
+            {
+                callGuide: "After the form is submitted",
+                parametersGuide: ["The form data as an object"],
+                callback: processFormData
+            }
+        ]
+    }}
+/>
+```
+</CodeBlock>
+
+<PropertiesHeading>
+## onInit
+</PropertiesHeading>
+
+**Type**: `((target: Target, ...args: any[]) => void) | string`
+
+**Default Value**: `undefined`
+
+### Description
+
+onInit is used to execute code after the component is initialized. It can be a function or a prompt for the AI to generate a function.
+
+- **If it's a function:** It receives the initialized element as its first argument and can perform actions like focusing the input or applying initial styling.
+- **If it's a string:** It's treated as a prompt for the AI to generate a function that will be executed on the first render. The generated function also receives the initialized element as its first argument.
+
+### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {8} filename="AIButton" copy
+const focusInput = (target) => {
+  target.focus();
+};
+
+<AIInput
+  prompt="Input field"
+  filename="focusInput"
+  onInit={focusInput}
+/>
+```
+```jsx {4} filename="AIInput" copy
+<AIInput
+  prompt="Input field with initial styling"
+  filename="styledInput"
+  onInit="Apply a border and padding to the input"
+/>
+```
+```jsx {8} filename="AIForm" copy
+const setAttribute = (target) => {
+    target.setAttribute("placeholder", "Enter your name");
+};
+
+<AIInput
+    prompt="Input field with placeholder"
+    filename="placeholderInput"
+    onInit={setAttribute}
+/>
+```
+</CodeBlock>
+
+<Notes note="info">
+See `AIInput` in the above examples for `onInit` as a prompt
+</Notes>
+
+<PropertiesHeading>
+## feedback
+</PropertiesHeading>
+
+**Type**: `string`
+
+**Default Value**: `undefined` 
+
+### Description
+
+`feedback` allows you to provide textual feedback to the AI about its previous code generation. This feedback should describe any errors, desired changes, or specific instructions for the AI to refine its output. The AI will then attempt to regenerate the code based on this feedback.
+
+### Usage
+
+<CodeBlock options={aiComponentNames}>
+```jsx {5} filename="AIButton" copy
+<AIButton
+  prompt="Fetch data from an API and display it"
+  filename="apiFetcher"
+  listener="onClick"
+  feedback="The generated code is missing error handling. Please add a try-catch block to handle network errors."
+/>
+```
+```jsx {5} filename="AIInput" copy
+<AIInput
+    prompt="Validate email input"
+    filename="emailValidator"
+    listener="onChange"
+    feedback="The regex pattern is too strict, allow hyphens in the domain name."
+/>
+```
+```jsx {5} filename="AIForm" copy
+<AIForm
+    prompt="Submit user form to database"
+    filename="userSubmit"
+    listener="onSubmit"
+    feedback="The generated code is using the wrong database table. Use the 'users' table instead of 'customers'."
+/>
+```
+</CodeBlock>
+
+<PropertiesHeading>
+## cacheResponse
+</PropertiesHeading>
+
+**Type**: `boolean`
+
+**Default Value**: `true` 
+
+### Description
+
+`cacheResponse` determines if the AI's response should be cached. If set to false, a refresh button is added, allowing users to regenerate the code.
+
+### Usage
+
+```jsx {5} filename="AIButton"
+<AIButton
+  prompt="Display a random number"
+  filename="randomNumber"
+  listener="onClick"
+  cacheResponse={false}
+>
+  Generate Number
+</AIButton>
+```
+
+<Notes note="info">
+When you have [feedback](./common#feedback) you must set `cacheResponse` to `false` to send a new request with the feedback
+</Notes>

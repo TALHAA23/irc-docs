@@ -1,0 +1,40 @@
+# Installation
+import { packageRegistriesOptions } from "@/utils/utils";
+import CodeBlock from "@components/CodeBlock";
+
+Getting started with Intelligent React Components is straightforward. You can install the library using your preferred package manager.
+
+## Requirements
+
+- Node.js 18.x or higher
+- React 18.x or higher
+
+## Installation Commands
+
+<CodeBlock options={packageRegistriesOptions}>
+```bash filename="bash" copy
+# Using npm
+npm install irc
+```
+```bash filename="bash" copy
+# Using pnpm
+pnpm add irc
+```
+```bash filename="bash" copy
+# Using yarn
+yarn add irc
+```
+</CodeBlock>
+
+
+## Setting Up Gemini API
+
+Intelligent React Components relies on Google's Gemini API to power its AI capabilities. You'll need to set up an API key:
+
+1. Get a Gemini API key from [Google AI Studio](https://ai.google/studio)
+2. Add the API key to your environment variables:
+
+```bash filename="bash" copy
+# In your .env file
+GEMINI_API_KEY=your_api_key_here
+```

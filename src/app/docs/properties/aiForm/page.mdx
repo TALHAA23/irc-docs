@@ -1,0 +1,329 @@
+import PropertiesHeading from "@components/PropertiesHeading";
+import Notes from "@components/Note";
+
+# AI Form Properties
+
+This page documents the specific properties available for the AIForm component. These properties control how form elements interact with AI capabilities and extend the [common](./common) properties shared across all intelligent components.
+The properties for AIForm allow you to configure how form submissions and interactions are processed using AI-generated logic, enabling sophisticated form handling with natural language prompts.
+
+<PropertiesHeading>
+## children
+</PropertiesHeading>
+
+**Type:** `React.ReactNode`
+**Default Value:** : None
+
+### Description
+The content to be rendered inside the form element. This typically includes input fields, labels, buttons, and other form elements that make up your form.
+
+
+### Usage
+```jsx {7-22} filename="AIForm"
+<AIForm
+  prompt="When submitted, validate all fields and send data to the API"
+  filename="contactFormHandler"
+  listener="onSubmit"
+  attributes={{ className: "contact-form" }}
+>
+  <div className="form-group">
+    <label htmlFor="name">Name</label>
+    <input type="text" id="name" name="name" required />
+  </div>
+  
+  <div className="form-group">
+    <label htmlFor="email">Email</label>
+    <input type="email" id="email" name="email" required />
+  </div>
+  
+  <div className="form-group">
+    <label htmlFor="message">Message</label>
+    <textarea id="message" name="message" rows={5} required></textarea>
+  </div>
+  
+  <button type="submit">Submit</button>
+</AIForm>
+```
+
+<PropertiesHeading>
+## fieldDefinitions
+</PropertiesHeading>
+
+**Type:** `{id?:string, fieldDefinition:string, styleHint?:string, layout?:string, validate?: string}[]`
+
+**Default Value:** None
+
+### Description
+
+`fieldDefinitions` is an array of objects that define the individual fields within the `AIForm`. Each object describes a field's properties, allowing you to specify its definition, style, layout, and validation rules. This property provides a structured way to define form fields, offering an alternative or supplement to the main `prompt` prop.
+
+<Notes note="info">
+`fieldDefinition` is optional, You can make use of `prompt` to define what you want. eg.
+```js
+{
+    prompt:"An inqury form with fields for name, age and message"
+}
+```
+Prefer to use `fieldDefinition` if you can.
+</Notes>
+
+<PropertiesHeading>
+### fieldDefinations[ ].id
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+`id` is a unique identifier for the form field. It is used to reference the field in other parts of the form definition, such as conditional logic or validation rules. You can refer to a field using the prefix `@` followed by the `id` (e.g., `fieldDefination: Value should be same as @SomeOtherField`).
+
+
+<PropertiesHeading>
+### fieldDefinations[ ].fieldDefination
+</PropertiesHeading>
+
+**Type:** `string`
+
+`fieldDefination` is a concise description of the desired form field. This prompt is used by the AI to generate the field's properties. It should clearly describe the type of field and its purpose.
+
+
+<PropertiesHeading>
+### fieldDefinations[ ].styleHint
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+styleHint provides hints for the desired visual style of the form field. Examples include "outlined," "filled," or "compact."
+
+
+<PropertiesHeading>
+### fieldDefinations[ ].layout
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+layout provides hints for the desired layout of the form field within the form. Examples include "full-width," "half-width," or "grid-column."
+
+
+<PropertiesHeading>
+### fieldDefinations[ ].validate
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+validate provides guidelines for field validation. Examples include "Required," "Must be a valid email address," "Must be a number between 1 and 100," or "Must match the password field."
+
+### Usage
+```jsx {4-33} filename="AIForm"
+<AIForm
+  prompt="Create a user registration form."
+  filename="userRegistration"
+  fieldDefinitions={[
+    {
+      id: "username",
+      fieldDefination: "Username input field",
+      validate: "Required, minimum 3 characters",
+      layout: "full-width",
+      styleHint: "outlined",
+    },
+    {
+      id: "email",
+      fieldDefination: "Email input field",
+      validate: "Must be a valid email address",
+      layout: "full-width",
+      styleHint: "outlined",
+    },
+    {
+      id: "password",
+      fieldDefination: "Password input field",
+      validate: "Required, minimum 8 characters",
+      layout: "full-width",
+      styleHint: "outlined",
+    },
+  ]}
+/>
+```
+
+<Notes note="info">
+if submission is not defined in `prompt` only form data will be `console`
+</Notes>
+
+<PropertiesHeading>
+## layout
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+### Description
+
+layout provides hints for the desired form layout. Examples include "one-column," "two-column," "grid," or "horizontal." This property guides the AI in arranging the form fields.
+
+### Usage
+```jsx {4} filename="AIForm"
+<AIForm
+  prompt="Create a contact form with fields for name, email and message"
+  filename="contactForm"
+  layout="two-column"
+/>
+```
+
+<PropertiesHeading>
+## styleHint
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+### Description
+styleHint provides guidelines for the visual style of the form. Examples include "company branding guidelines." This property can also be a complete prompt describing the desired UI.
+
+### Usage
+```jsx {4} filename="AIForm"
+<AIForm
+  prompt="Create a newsletter signup form with an email field"
+  filename="newsletterForm"
+  styleHint="A clean, modern UI with rounded corners and a subtle gradient background."
+/>
+```
+
+<PropertiesHeading>
+## validate
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+### Description
+
+`validate` provides guidelines for how or what validation should be performed on the form. This property allows you to specify validation rules using natural language, which the AI will interpret to generate appropriate validation logic.
+
+### Usage
+```jsx {4} filename="AIForm"
+<AIForm
+  prompt="Create a user registration form."
+  filename="registrationForm"
+  validate="Password must be at least 8 characters. Confirm password must match password."
+  fieldDefinitions={[
+    {
+      fieldDefination: "Username input field",
+    },
+    {
+      fieldDefination: "Password input field",
+    },
+    {
+      fieldDefination: "Confirm password input field",
+    },
+  ]}
+/>
+```
+
+<PropertiesHeading>
+## multiStep
+</PropertiesHeading>
+
+**Type:** `{ common?: string; steps: { title: string; fields: string[]; desc?: string; layout?: string; styleHint?: string; validate?: string; }[]; }`
+**Default Value:** `undefined`
+
+### Description
+
+`multiStep` enables the creation of multi-step forms. It contains an optional `common` property for shared step attributes and a `steps` array defining each step's configuration.
+
+
+<PropertiesHeading>
+### multiStep.common
+</PropertiesHeading>
+
+**Type:** `string`
+**Default Value:** `undefined`
+
+`common` provides shared attributes or instructions that apply to all steps in the multi-step form. This can include general layout, style hints, or validation rules that are consistent across steps.
+
+
+<PropertiesHeading required={true}>
+### multiStep.steps
+</PropertiesHeading>
+
+**Type:** `{ title: string; fields: string[]; desc?: string; layout?: string; styleHint?: string; validate?: string; }[]`
+
+steps is an array of objects, each defining a step in the multi-step form.
+
+<PropertiesHeading>
+#### multiStep.steps[ ].title
+</PropertiesHeading>
+
+title is the title of the step, displayed to the user.
+
+<PropertiesHeading>
+#### multiStep.steps[ ].fields
+</PropertiesHeading>
+
+**Type:** `string[]`
+
+fields is an array of field identifiers or descriptions that belong to this step. It's recommended to use field definitions with id properties and reference them here. Alternatively, you can use self-explanatory field names.
+
+
+<PropertiesHeading>
+#### multiStep.steps[ ].desc
+</PropertiesHeading>
+
+`desc` provides a detailed description of the step, adding more context for the AI and the user.
+
+<PropertiesHeading>
+#### multiStep.steps[ ].layout
+</PropertiesHeading>
+
+layout specifies the desired layout for this step.
+
+
+<PropertiesHeading>
+#### multiStep.steps[ ].styleHint
+</PropertiesHeading>
+
+`styleHint` provides guidelines for the visual style of this step.
+
+
+<PropertiesHeading>
+#### multiStep.steps[ ].validate
+</PropertiesHeading>
+
+`validate` specifies validation rules for this step.
+
+### Usage
+```jsx {4-24} filename="AIForm"
+<AIForm
+  prompt="Create a multi-step user registration form."
+  filename="multiStepRegistration"
+  multiStep={{
+    common: "Use Material Design for all steps.",
+    steps: [
+      {
+        title: "Personal Information",
+        fields: ["username", "email"],
+        validate: "Username is required. Email must be valid.",
+      },
+      {
+        title: "Address",
+        fields: ["street", "city", "zip"],
+        layout: "two-column",
+        validate: "All fields are required.",
+      },
+      {
+        title: "Password",
+        fields: ["password", "confirmPassword"],
+        validate: "Password must be 8 characters. Confirm password must match password.",
+      },
+    ],
+  }}
+  fieldDefinitions={[
+    { id: "username", fieldDefination: "Username input" },
+    { id: "email", fieldDefination: "Email input" },
+    { id: "street", fieldDefination: "Street address input" },
+    { id: "city", fieldDefination: "City input" },
+    { id: "zip", fieldDefination: "Zip code input" },
+    { id: "password", fieldDefination: "Password input" },
+    { id: "confirmPassword", fieldDefination: "Confirm password input" },
+  ]}
+/>
+```

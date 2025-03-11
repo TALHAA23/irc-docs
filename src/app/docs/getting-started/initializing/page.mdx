@@ -1,0 +1,92 @@
+# Initializing 
+After installing the library, there are a few important steps to set up your development environment properly.
+
+## Setting and Starting the Local Server
+
+Intelligent React Components uses a local Node.js server to process AI requests, create files, and manage other background operations. This server must be running during development.
+
+### Add Server Script
+
+Open your package.json file and add the following script:
+
+```json filename="json" copy
+{
+  "scripts": {
+    // Your existing scripts...
+    "server": "node node_modules/intelligent-react-components/build/server"
+  }
+}
+```
+
+### Run the Server
+Start the server in a separate terminal window:
+
+import { packageRegistriesOptions } from "@/utils/utils";
+import CodeBlock from "@components/CodeBlock";
+
+<CodeBlock options={ packageRegistriesOptions}> 
+```bash filename="bash" copy
+# Using npm
+npm run server
+```
+```bash filename="bash" copy
+# Using pnpm
+pnpm run server
+```
+```bash filename="bash" copy
+# Using yarn
+yarn run server
+```
+</CodeBlock>
+
+_Keep this terminal open while developing your application. The server will log requests and operations._
+
+
+## Setting Up the Provider (Optional)
+
+To see details about the AI components, you need to wrap your application with the IRCProvider:
+
+```jsx filename="jsx" copy
+import { IRCProvider } from 'irc';
+
+function App() {
+  return (
+    <IRCProvider>
+      {/* Your application components */}
+    </IRCProvider>
+  );
+}
+```
+_All AI-powered components must be children of the IRCProvider._
+
+### Using DevTools (Optional)
+
+The library includes DevTools to help you debug and monitor your AI components.
+
+#### Setting Up DevTools
+1. Import the necessary components:
+
+```jsx filename="jsx" copy
+import { IRCProvider, DevTool } from 'irc';
+```
+
+2. Add the DevTools component within your provider:
+
+```jsx filename="jsx" copy
+function App() {
+  return (
+    <IRCProvider>
+      {/* Your application components */}
+      <DevTool />
+    </IRCProvider>
+  );
+}
+```
+
+It provides a panel to monitor:
+
+- Prompts sent to the AI
+- Responses received
+- Loading states
+- Errors
+- Success notifications
