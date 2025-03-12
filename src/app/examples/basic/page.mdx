@@ -1,0 +1,645 @@
+import HideShowCodeBlock from "@components/HideShowCodeBlock";
+import Notes from "@components/Note";
+
+
+# Basic Examples
+
+## AIButton
+
+### Simple Alert Button
+
+**Scenario:**
+
+Create a button that, when clicked, displays a simple alert message with "Hello, World!".
+
+```jsx filename="helloAlertButton" copy
+<AIButton
+  prompt="Display an alert with the message 'Hello, World!'"
+  filename="helloAlertButton"
+  listener="onClick"
+  label="Say Hello"
+>
+```
+
+<HideShowCodeBlock>
+
+```js filename="helloAlertButton" copy
+const globals={};
+
+export default function main(event, args) {
+  alert("Hello, World!");
+}
+
+export const meta = {
+ thoughts: "A click event listener will be generated to display an alert box with the message 'Hello, World!' when the button is clicked.",
+ expect: "The user is not expected to add anything just clicking the button will work"
+}
+```
+</HideShowCodeBlock>
+
+
+### Dynamic Greeting Button
+
+**Scenario:**
+
+Create a button that, when clicked, displays an alert message with a personalized greeting. The greeting should include a name provided as a supporting property.
+
+```jsx filename="greetingButton" copy
+const userName = "Alice";
+
+<AIButton
+  prompt="Display an alert with a greeting to $name"
+  filename="greetingButton"
+  listener="onClick"
+  supportingProps={{
+    utils: { $name: userName },
+  }}
+  label="Greet User"
+>
+```
+
+<HideShowCodeBlock>
+```js filename="greetingButton" copy
+const globals={};
+
+export default function main(event, args) {
+  alert(`Hello, ${args.$name}!`);
+}
+
+export const meta = {
+ thoughts: "This prompt instructs to display an alert with a greeting to a specific name, which is provided through the utils. The name is accessed from the args object.",
+ expect: "The `args` object should contain a key '$name' with a string value representing the name to be greeted."
+}
+```
+</HideShowCodeBlock>
+
+<Notes note="info">
+The `args` parameter at `main` in `response` is used to collect data from user code base.
+</Notes>
+
+## AIInput
+
+### Display Input Value in Paragraph
+
+**Scenario:**
+
+Create an input field that, as the user types, displays the entered text in a paragraph element below the input.
+
+```jsx filename="displayInput" copy
+import React, { useState } from 'react';
+
+function DisplayInput() {
+  const [inputValue, setInputValue] = useState('');
+
+  return (
+    <div>
+      <AIInput
+        prompt="Update a state variable with the input text"
+        filename="displayInput"
+        listener="onChange"
+        mutation={[
+          {
+            id: "updateInput",
+            returnFormat: "string",
+            mutate: setInputValue,
+            mutationType: "callback",
+          },
+        ]}
+      />
+      <p>Input Value: {inputValue}</p>
+    </div>
+  );
+}
+```
+
+<HideShowCodeBlock>
+```js filename="updateInput"
+const globals={};
+
+export default function main(event, args) {
+  event.preventDefault();
+  const newValue = event.target.value;
+  args.updateInput(newValue);
+}
+
+export const meta = {
+ thoughts: "The prompt requires creating a function that handles the onChange event of an input field. It should update a state variable (passed via args) with the input text. A mutation named 'updateInput' is provided, which is a callback function that will be called with the input value.",
+ expect: "The 'updateInput' callback function should be passed in the args object. The form element must contain an input."
+}
+
+```
+</HideShowCodeBlock>
+
+### Input Validation with feedback from user codebase
+
+**Scenario:**
+
+Create an input field that validates the input as an email address and displays real-time feedback (a message) using a callback from user codebase.
+
+```jsx filename="emailValidationInput" copy
+function EmailValidationInput() {
+const emailValidationResult = (message) => {
+    console.log(message);
+  };
+
+  return (
+    <div>
+      <AIInput
+        prompt="Validate the input as an email address and display a message"
+        filename="emailValidationInput"
+        listener="onChange"
+        validate="Must be a valid email address"
+        callbacks={{
+          dependent: [
+            {
+              callGuide: "When the validation result changes",
+              parametersGuide: ["The validation message"],
+              callback: emailValidationResult,
+            },
+          ],
+        }}
+      />
+    </div>
+  );
+}
+```
+
+<HideShowCodeBlock>
+```js filename="emailValidationInput"
+const globals={};
+function fnValidateEmail(email) {
+  const re = /^[\w.-]+@[\w-]+\.[\w-]{2,4}$/;
+  return re.test(email);
+}
+
+export default function main(event, args) {
+  const email = event.target.value;
+  const isValid = fnValidateEmail(email);
+  const message = isValid ? "Valid email address" : "Invalid email address";
+  args.emailValidationResult(message);
+}
+
+export const meta = {
+ thoughts: "The prompt is to validate the email address and display a message via the callback function `emailValidationResult`.",
+ expect: "The args object must contain the callback function `emailValidationResult`, which receives a string parameter containing the validation message."
+}
+```
+</HideShowCodeBlock>
+
+## AIForm
+
+### Simple Contact Form
+
+**Scenario:**
+
+Create a simple contact form with fields for name, email, and message.
+
+```jsx filename="basicContactForm" copy
+<AIForm
+  prompt="Create a contact form with name, email, and message fields."
+  filename="basicContactForm"
+  listener="onSubmit"
+/>
+```
+
+<HideShowCodeBlock>
+```js filename="basicContactForm"
+import "./css/basicContactForm.css"
+
+const globals={"isFormBuilt":false,"submitButton":null};
+function createElement(tag, options) {
+  const element = document.createElement(tag);
+  if (options.dataset) {
+    for (const key in options.dataset) {
+      if (options.dataset.hasOwnProperty(key)) {
+        element.dataset[key] = options.dataset[key];
+      }
+    }
+    delete options.dataset;
+  }
+  Object.assign(element, options);
+  return element;
+}
+function setStatus(message, type) {
+  const statusDiv = document.getElementById("basicContactForm-formStatus");
+  statusDiv.textContent = message;
+  statusDiv.className = "basicContactForm-status " + type;
+}
+function toggleButtonState(disabled, text) {
+  if (globals.submitButton) {
+    globals.submitButton.disabled = disabled;
+    globals.submitButton.textContent = text;
+  }
+}
+
+export default function main(event, args) {
+  event.preventDefault();
+
+  setStatus("", ""); // Clear previous status
+  toggleButtonState(true, "Submitting...");
+
+  const formData = new FormData(event.currentTarget);
+  const name = formData.get("name");
+  const email = formData.get("email");
+  const message = formData.get("message");
+
+  // Simulate submission process
+  setTimeout(() => {
+    console.log("Name:", name, "Email:", email, "Message:", message);
+    setStatus("Form submitted successfully!", "success");
+    toggleButtonState(false, "Submit");
+  }, 1500);
+}
+
+export function formBuilder(formElement, args) {
+  if (globals.isFormBuilt) return;
+
+  if (!(formElement instanceof HTMLFormElement)) {
+    console.warn("Invalid formElement provided. Expected an HTMLFormElement.");
+    return;
+  }
+
+  formElement.classList.add("basicContactForm");
+
+  // Title
+  const title = createElement("h1", {
+    textContent: "Contact Us",
+    classList: ["basicContactForm-title"],
+  });
+
+  // Status Message Container
+  const statusDiv = createElement("div", {
+    id: "basicContactForm-formStatus",
+    classList: ["basicContactForm-status"],
+  });
+
+  // Name
+  const nameLabel = createElement("label", {
+    htmlFor: "basicContactForm-name",
+    textContent: "Name:",
+    classList: ["basicContactForm-label"],
+  });
+  const nameInput = createElement("input", {
+    type: "text",
+    id: "basicContactForm-name",
+    name: "name",
+    classList: ["basicContactForm-input"],
+  });
+
+  // Email
+  const emailLabel = createElement("label", {
+    htmlFor: "basicContactForm-email",
+    textContent: "Email:",
+    classList: ["basicContactForm-label"],
+  });
+  const emailInput = createElement("input", {
+    type: "email",
+    id: "basicContactForm-email",
+    name: "email",
+    classList: ["basicContactForm-input"],
+  });
+
+  // Message
+  const messageLabel = createElement("label", {
+    htmlFor: "basicContactForm-message",
+    textContent: "Message:",
+    classList: ["basicContactForm-label"],
+  });
+  const messageTextarea = createElement("textarea", {
+    id: "basicContactForm-message",
+    name: "message",
+    classList: ["basicContactForm-textarea"],
+  });
+
+  globals.submitButton = createElement("button", {
+    type: "submit",
+    textContent: "Submit",
+    classList: ["basicContactForm-button"],
+  });
+
+  formElement.appendChild(title);
+  formElement.appendChild(statusDiv);
+  formElement.appendChild(nameLabel);
+  formElement.appendChild(nameInput);
+  formElement.appendChild(emailLabel);
+  formElement.appendChild(emailInput);
+  formElement.appendChild(messageLabel);
+  formElement.appendChild(messageTextarea);
+  formElement.appendChild(globals.submitButton);
+
+  globals.isFormBuilt = true;
+}
+
+export const meta = {
+ thoughts: "The prompt requests a simple contact form with name, email, and message fields. The filename is `basicContactForm` and the listener is `onSubmit`. I will also add code to address issue with 'active classes' which result in all sections being visible simultaneously, negating the intended step-by-step navigation. I will ensure correct implementation of active classes to control section visibility and enable proper navigation.",
+ expect: "Ensure the HTML includes a `<form>` element with the class `basicContactForm`. The generated JavaScript code is designed to be used with an existing form element and will not create a new form element itself. The form should be placed where you want the registration form to appear on your webpage."
+}
+```
+```css filename="basicContactForm"
+.basicContactForm {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.basicContactForm-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+}
+
+.basicContactForm-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.basicContactForm-input, .basicContactForm-textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.basicContactForm-button {
+  background-color: #3498db;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.basicContactForm-button:hover {
+  background-color: #2980b9;
+}
+
+.basicContactForm-status {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.basicContactForm-status.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.basicContactForm-status.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+```
+</HideShowCodeBlock>
+
+### User Registration Form with Validation
+
+**Scenario:**
+
+User registration form with basic validation rules to ensure all fields are required, email is valid and some password constraints.
+
+```jsx filename="basicRegistrationForm" copy
+<AIForm
+  prompt="Create a user registration form with username, email, and password fields."
+  filename="basicRegistrationForm"
+  validate="All fields are required. Email must be a valid email address. Password must be 8 char long"
+  listener="onSubmit"
+  styleHint="Center the form both horizontally and vertically"
+  />
+```
+
+<HideShowCodeBlock>
+```jsx filename="basicRegistrationForm"
+import "./css/basicRegistrationForm.css"
+
+const globals={"isFormBuilt":false,"submitButton":null};
+function createElement(tag, options) {
+  const element = document.createElement(tag);
+  if (options.dataset) {
+    for (const key in options.dataset) {
+      if (options.dataset.hasOwnProperty(key)) {
+        element.dataset[key] = options.dataset[key];
+      }
+    }
+    delete options.dataset;
+  }
+  Object.assign(element, options);
+  return element;
+}
+function setStatus(message, type) {
+  const statusDiv = document.getElementById("basicRegistrationForm-formStatus");
+  statusDiv.textContent = message;
+  statusDiv.className = "basicRegistrationForm-status " + type;
+}
+function toggleButtonState(disabled, text) {
+  if (globals.submitButton) {
+    globals.submitButton.disabled = disabled;
+    globals.submitButton.textContent = text;
+  }
+}
+
+export default function main(event, args) {
+  event.preventDefault();
+
+  setStatus("", ""); // Clear previous status
+  toggleButtonState(true, "Registering...");
+
+  const formData = new FormData(event.currentTarget);
+  const username = formData.get("username");
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  let errors = [];
+
+  if (!username) {
+    errors.push("Username is required.");
+  }
+  if (!email) {
+    errors.push("Email is required.");
+  } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+    errors.push("Email is not valid.");
+  }
+  if (!password) {
+    errors.push("Password is required.");
+  } else if (password.length < 8) {
+    errors.push("Password must be at least 8 characters long.");
+  }
+
+  if (errors.length > 0) {
+    setStatus(errors.join("\n"), "error");
+    toggleButtonState(false, "Register");
+    return;
+  }
+
+  // Simulate registration process
+  setTimeout(() => {
+    console.log("Username:", username, "Email:", email, "Password:", password);
+    setStatus("Registration successful!", "success");
+    toggleButtonState(false, "Register");
+  }, 1500);
+}
+
+export function formBuilder(formElement, args) {
+  if (globals.isFormBuilt) return;
+
+  if (!(formElement instanceof HTMLFormElement)) {
+    console.warn("Invalid formElement provided. Expected an HTMLFormElement.");
+    return;
+  }
+
+  formElement.classList.add("basicRegistrationForm");
+
+  // Title
+  const title = createElement("h1", {
+    textContent: "User Registration",
+    classList: ["basicRegistrationForm-title"],
+  });
+
+  // Status Message Container
+  const statusDiv = createElement("div", {
+    id: "basicRegistrationForm-formStatus",
+    classList: ["basicRegistrationForm-status"],
+  });
+
+  // Username
+  const usernameLabel = createElement("label", {
+    htmlFor: "basicRegistrationForm-username",
+    textContent: "Username:",
+    classList: ["basicRegistrationForm-label"],
+  });
+  const usernameInput = createElement("input", {
+    type: "text",
+    id: "basicRegistrationForm-username",
+    name: "username",
+    classList: ["basicRegistrationForm-input"],
+    required: true,
+  });
+
+  // Email
+  const emailLabel = createElement("label", {
+    htmlFor: "basicRegistrationForm-email",
+    textContent: "Email:",
+    classList: ["basicRegistrationForm-label"],
+  });
+  const emailInput = createElement("input", {
+    type: "email",
+    id: "basicRegistrationForm-email",
+    name: "email",
+    classList: ["basicRegistrationForm-input"],
+    required: true,
+  });
+
+  // Password
+  const passwordLabel = createElement("label", {
+    htmlFor: "basicRegistrationForm-password",
+    textContent: "Password:",
+    classList: ["basicRegistrationForm-label"],
+  });
+  const passwordInput = createElement("input", {
+    type: "password",
+    id: "basicRegistrationForm-password",
+    name: "password",
+    classList: ["basicRegistrationForm-input"],
+    required: true,
+  });
+
+  globals.submitButton = createElement("button", {
+    type: "submit",
+    textContent: "Register",
+    classList: ["basicRegistrationForm-button"],
+  });
+
+  formElement.appendChild(title);
+  formElement.appendChild(statusDiv);
+  formElement.appendChild(usernameLabel);
+  formElement.appendChild(usernameInput);
+  formElement.appendChild(emailLabel);
+  formElement.appendChild(emailInput);
+  formElement.appendChild(passwordLabel);
+  formElement.appendChild(passwordInput);
+  formElement.appendChild(globals.submitButton);
+
+  globals.isFormBuilt = true;
+}
+
+export const meta = {
+ thoughts: "The prompt requests a basic registration form with username, email, and password fields. All fields are required, with email and password having specific validation rules. The style hint is to center the form both horizontally and vertically. The filename is `basicRegistrationForm` and the listener is `onSubmit`.",
+ expect: "The generated JavaScript code is designed to be used with an existing form element and will not create a new form element itself. The form should be placed where you want the registration form to appear on your webpage."
+}
+```
+```css filename="basicRegistrationForm"
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.basicRegistrationForm {
+  font-family: Arial, sans-serif;
+  max-width: 400px;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.basicRegistrationForm-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+}
+
+.basicRegistrationForm-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.basicRegistrationForm-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.basicRegistrationForm-button {
+  background-color: #3498db;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.basicRegistrationForm-button:hover {
+  background-color: #2980b9;
+}
+
+.basicRegistrationForm-status {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.basicRegistrationForm-status.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.basicRegistrationForm-status.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+```
+</HideShowCodeBlock>

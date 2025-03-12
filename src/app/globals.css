@@ -3,10 +3,50 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* notes */
-  --infoBorderColor: rgb(30 64 175);
-  --infoBg: rgba(98, 135, 177, 0.685);
-  --infoTextColor: rgb(0, 23, 84);
+
+  /* Primary Colors */
+  --primaryColor: #007bff; /* Example: Blue */
+  --primaryLight: #e1f0ff;
+  --primaryDark: #0056b3;
+
+  /* Secondary Colors */
+  --secondaryColor: #6c757d; /* Example: Gray */
+  --secondaryLight: #f8f9fa;
+  --secondaryDark: #495057;
+
+  /* Text Colors */
+  --textColor: #333;
+  --textLight: #666;
+  --textInverse: #fff;
+
+  /* Background Colors */
+  --backgroundColor: #f4f4f4;
+  --backgroundLight: #fff;
+  --backgroundDark: #e0e0e0;
+
+  /* Border Colors */
+  --borderColor: #ddd;
+
+  /* Notification Colors */
+  --warnBorderColor: #ffc107;
+  --warnBg: rgba(255, 193, 7, 0.2);
+  --warnTextColor: #856404;
+
+  --infoBorderColor: #17a2b8;
+  --infoBg: rgba(23, 162, 184, 0.2);
+  --infoTextColor: #0c5460;
+
+  --goodToKnowBorderColor: #28a745;
+  --goodToKnowBg: rgba(40, 167, 69, 0.2);
+  --goodToKnowTextColor: #155724;
+
+  --alsoKnowBorderColor: #6f42c1;
+  --alsoKnowBg: rgba(111, 66, 193, 0.2);
+  --alsoKnowTextColor: #492882;
+
+  --avoidBorderColor: #dc3545;
+  --avoidBg: rgba(220, 53, 69, 0.2);
+  --avoidTextColor: #721c24;
 }
 
 @theme inline {
@@ -42,8 +82,37 @@ body {
   @apply font-bold text-2xl sm:text-4xl;
 }
 
+/* Warn */
+.warn {
+  color: var(--warnTextColor);
+  background-color: var(--warnBg);
+  border: 2px solid var(--warnBorderColor);
+}
+
+/* Info */
 .info {
   color: var(--infoTextColor);
   background-color: var(--infoBg);
   border: 2px solid var(--infoBorderColor);
+}
+
+/* Good to Know */
+.good-to-know {
+  color: var(--goodToKnowTextColor);
+  background-color: var(--goodToKnowBg);
+  border: 2px solid var(--goodToKnowBorderColor);
+}
+
+/* Also Know */
+.also-know {
+  color: var(--alsoKnowTextColor);
+  background-color: var(--alsoKnowBg);
+  border: 2px solid var(--alsoKnowBorderColor);
+}
+
+/* Don't */
+.avoid {
+  color: var(--avoidTextColor);
+  background-color: var(--avoidBg);
+  border: 2px solid var(--avoidBorderColor);
 }
