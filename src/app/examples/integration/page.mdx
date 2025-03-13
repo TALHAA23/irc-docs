@@ -1,0 +1,260 @@
+import Notes from "@components/Note";
+import HideShowCodeBlock from "@components/HideShowCodeBlock";
+
+# Integration Examples
+
+Examples where prompt uses:
+- Request to API
+- Database Integration
+- Using other libraries
+
+## AIButton
+
+### Dynamic Post Navigation (Two AIButton's - Single File)
+
+**Scenario:**
+
+Develop a single, dynamically adaptable prompt that enables the generation of code capable of handling both "Previous" and "Next" button functionalities. The generated code should fetch posts from an API in the respective directions, demonstrating the AI's ability to create flexible, multi-purpose logic from a single prompt.
+
+```jsx {9, 28} filename="dynamicPostNavigation" copy
+const [postData, setPostData] = useState();
+
+<AIButton
+        prompt="Fetch in $direction post from $JSONPlaceholder API relative to the current post and update the &setPost, starting post id is 1"
+        filename="dynamicPostNavigation"
+        listener="onClick"
+        supportingProps={{
+          utils: {
+            $direction: "Previous",
+            $JSONPlaceholder: "https://jsonplaceholder.typicode.com/posts",
+          },
+        }}
+        mutation={[
+          {
+            id: "setPost",
+            mutate: setPostData,
+            returnFormat: "object",
+            mutationType: "callback",
+          },
+        ]}
+        label="Previous"
+>
+
+<AIButton
+// Other same props
+    supportingProps={{
+        utils: {
+            $direction: "Previous",
+        },
+    }}
+    label="Next"
+/>
+```
+
+<HideShowCodeBlock>
+```js filename="dynamicPostNavigation"
+const globals={"currentPostId":1};
+function fnGetAdjacentPostId(currentId, direction) {
+  if (direction === "Previous") {
+    return Math.max(1, currentId - 1);
+  } else {
+    return Math.min(100, currentId + 1); // Assuming there are 100 posts
+  }
+}
+
+export default async function main(event, args) {
+  try {
+    const currentPostId = globals.currentPostId || 1;
+    const nextPostId = fnGetAdjacentPostId(currentPostId, args.$direction);
+    const response = await fetch(`${args.$JSONPlaceholder}/${nextPostId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const post = await response.json();
+    args.setPost(post);
+    globals.currentPostId = nextPostId;
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
+}
+
+export const meta = {
+ thoughts: "The prompt instructs to fetch the previous or next post from the JSONPlaceholder API relative to the current post, and update a state with the new post data. I will use helper functions to determine the next/previous post ID. The initial post ID is 1. A helper function will handle the API call.",
+ expect: "The `args` object must contain keys `$direction` (string, either 'Previous' or 'Next'), `$JSONPlaceholder` (string, the API endpoint), and 'setPost' (a callback function that accepts a post object). The JSONPlaceholder API must be accessible and return post objects with an ID. The number of posts should be considered in fnGetAdjacentPostId."
+}
+```
+</HideShowCodeBlock>
+
+<Notes note="good-to-know">
+The secound `AIButton` that shares the same `filename` can omit all the fields and just pass `filename` as it will not send another request.
+</Notes>
+
+## AIInput
+
+### Firebase Product Search with Debounce and Caching 
+
+**Scenario:**
+
+Create a search input field that queries the "products" collection in Firebase, specifically the "title" field, based on the user's input. Implement a debounce effect to prevent excessive queries and cache the results for each search term. Display the search results directly below the input, with each result being clickable and logging the product details to the console. 
+
+```jsx filename="firebaseProductSearch" copy
+<AIInput
+  prompt="A Search bar which Search the 'products' collection in Firebase, querying the 'title' field, for products matching the input from start, use a debounce effect, and cache the results. Display the results directly below the input, with each result clickable and logging the product details to the console. Style the result display it should be right below the search bar."
+  onInit="Style the input, max 300px width, aligh to right of the screen. Overall search should be appealing."
+  type="search"
+  filename="firebaseProductSearch"
+  listener="onChange"
+  supportingProps={{
+    database: {
+      name: "firebase",
+      envGuide:
+        "Each var should be Prefix with NEXT_PUBLIC and suffix with _P2",
+      },
+    }}
+  attributes={{
+    placeholder: "Search a product",
+  }}
+/>
+```
+
+<HideShowCodeBlock>
+
+<Notes note="also-know">
+Sometimes the model might do a small mistake like the highligted string `searchParam` in the response was `query` which was same as the firebase `imported` function query causing error. So you might need to modify such mistakes.
+</Notes>
+
+<Notes note="good-to-know">
+The model is instructed to generated error-tolerance code so such error will not break your code. You can see console to know what and where is the problem.
+</Notes>
+
+```js filename="firebaseProductSearch" copy /searchParam/
+import { initializeApp } from 'firebase/app';;
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';;
+const globals={"debounceTimer":null,"cachedResults":null,"firebaseAppInitialized":false};
+async function fnSearchProducts(searchParam) {
+  if (!globals.firebaseAppInitialized) {
+    initializeApp({
+      apiKey: process.env.NEXT_PUBLIC_API_KEY_P2,
+      authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN_P2,
+      projectId: process.env.NEXT_PUBLIC_PROJECT_ID_P2,
+      storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET_P2,
+      messagingSenderId: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID_P2,
+      appId: process.env.NEXT_PUBLIC_APP_ID_P2,
+    });
+    globals.firebaseAppInitialized = true;
+  }
+
+  const db = getFirestore();
+  const productsCollection = collection(db, "products");
+  const q = query(
+    productsCollection,
+    where("title", ">=", searchParam),
+    where("title", "<=", searchParam + "\uf8ff"), // Needed because Firebase doesn't directly support startsWith
+  );
+
+  const querySnapshot = await getDocs(q);
+  const results = [];
+  querySnapshot.forEach((doc) => {
+    results.push({ id: doc.id, ...doc.data() });
+  });
+  return results;
+}
+function fnDisplayResults(results) {
+  const resultsContainer =
+    document.getElementById("searchResults") || fnCreateResultsContainer();
+  resultsContainer.innerHTML = "";
+
+  if (results.length === 0) {
+    const noResults = document.createElement("div");
+    noResults.textContent = "No results found.";
+    noResults.style.padding = "10px";
+    resultsContainer.appendChild(noResults);
+    return;
+  }
+
+  results.forEach((product) => {
+    const productElement = document.createElement("div");
+    productElement.textContent = product.title;
+    productElement.style.padding = "10px";
+    productElement.style.borderBottom = "1px solid #eee";
+    productElement.style.cursor = "pointer";
+    productElement.addEventListener("click", () =>
+      console.log("Product details:", product),
+    );
+    resultsContainer.appendChild(productElement);
+  });
+}
+function fnCreateResultsContainer() {
+  const searchInput = document.querySelector('input[type="search"]');
+  const searchResultsContainer = document.createElement("div");
+  searchResultsContainer.id = "searchResults";
+  searchResultsContainer.style.cssText = `
+    position: absolute;
+    top: ${searchInput.offsetTop + searchInput.offsetHeight}px;
+    left: ${searchInput.offsetLeft}px;
+    width: ${searchInput.offsetWidth}px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+  `;
+
+  document.body.appendChild(searchResultsContainer);
+  return searchResultsContainer;
+}
+function fnClearResults() {
+  const resultsContainer = document.getElementById("searchResults");
+  if (resultsContainer) {
+    resultsContainer.innerHTML = "";
+  }
+}
+
+export default function main(event, args) {
+  const query = event.target.value.trim();
+console.log(query)
+  if (!query) {
+    fnClearResults();
+    return;
+  }
+
+  clearTimeout(globals.debounceTimer);
+  globals.debounceTimer = setTimeout(async () => {
+    try {
+      let results;
+      if (globals.cachedResults && globals.cachedResults[query]) {
+        results = globals.cachedResults[query];
+      } else {
+        results = await fnSearchProducts(query);
+        globals.cachedResults = globals.cachedResults || {};
+        globals.cachedResults[query] = results;
+      }
+      fnDisplayResults(results);
+    } catch (error) {
+      console.error("Error searching products:", error);
+    }
+  }, 300);
+}
+
+export function onInitialRender(target, args) {
+  target.style.cssText = `
+    width: 300px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: auto;
+    margin-right: 0;
+    display: block;
+    box-sizing: border-box; /* Ensures padding is included in the width */
+    font-size: 16px;
+  `;
+}
+
+export const meta = {
+ thoughts: "This prompt asks for a styled, Firebase-connected search bar with debouncing, caching, and dynamic result display. The 'onInit' requires styling the input and making the overall search appealing. I will provide a comprehensive solution, focusing on both functionality and visual design. I have now included css styling on the search results to improve the appearence.",
+ expect: "The user needs to 1. Install Firebase., 2. Set up Firebase environment variables (NEXT_PUBLIC_API_KEY_P2, NEXT_PUBLIC_AUTH_DOMAIN_P2, NEXT_PUBLIC_PROJECT_ID_P2, NEXT_PUBLIC_STORAGE_BUCKET_P2, NEXT_PUBLIC_MESSAGING_SENDER_ID_P2, NEXT_PUBLIC_APP_ID_P2)., 3. Create a 'products' collection in Firestore with documents having a 'title' field., 4. Include an input element with type="search" in the DOM. Ensure no initial element with id='searchResults' exist, dynamically one will be added by the javascript code at the bottom of the page's body element."
+}
+```
+</HideShowCodeBlock>
