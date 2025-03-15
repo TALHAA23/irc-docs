@@ -1,34 +1,51 @@
-import { Layout, Link } from "nextra-theme-docs";
-import { Banner, Head } from "nextra/components";
+import { Layout, Link, Navbar, ThemeSwitch, Footer } from "nextra-theme-docs";
+import { Banner, Head, Image } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import "nextra-theme-docs/style.css";
 import "./globals.css";
-import ThemeSwitch from "@/components/ThemeSwitch";
 import React from "react";
-
+import Logo from "@/components/Logo";
 export const metadata = {
   title: "IRC",
 };
-
 const banner = (
   <Banner storageKey="some-key">
     City University of science and information technology
   </Banner>
 );
+
+const logo = <Logo />;
 const navbar = (
-  <nav className="w-ful h-[60px] px-1 flex items-center py-3 justify-between">
-    <img src="/logo.svg" alt="irc-logo" className="h-full" />
-    <div className="flex gap-1 items-center gap-2">
+  <Navbar logo={logo}>
+    <div className="flex items-center gap-2">
       {["docs", "examples"].map((item, index) => (
-        <Link key={index} href={item} className=" capitalize">
+        <Link
+          key={index}
+          href={item}
+          className="capitalize text-black dark:text-white no-underline hover:opacity-80"
+        >
           {item}
         </Link>
       ))}
       <ThemeSwitch />
     </div>
-  </nav>
+  </Navbar>
 );
-const footer = <footer>Footer goes here</footer>;
+const footer = (
+  <Footer className="flex flex-col">
+    <p className="flex items-center gap-3">
+      Contribute with ❤️ |{" "}
+      <Link href="https://github.com/TALHAA23/irc-docs">
+        <Image
+          src="/github.svg"
+          alt="github"
+          className=" h-[20px] bg-white rounded-full"
+        />
+      </Link>
+    </p>
+    <p>MIT {new Date().getFullYear()} © IRC.</p>
+  </Footer>
+);
 
 export default async function RootLayout({
   children,
@@ -41,7 +58,6 @@ export default async function RootLayout({
       lang="en"
       // Required to be set
       dir="ltr"
-      // Suggested by `next-themes` package https://github.com/pacocoursey/next-themes#with-app
       suppressHydrationWarning
     >
       <Head
@@ -54,9 +70,8 @@ export default async function RootLayout({
           banner={banner}
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
+          docsRepositoryBase="https://github.com/TALHAA23/irc-docs/blob/master"
           footer={footer}
-          // ... Your additional layout options
         >
           {children}
         </Layout>

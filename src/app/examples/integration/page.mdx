@@ -44,7 +44,7 @@ const [postData, setPostData] = useState();
 // Other same props
     supportingProps={{
         utils: {
-            $direction: "Previous",
+            $direction: "Next",
         },
     }}
     label="Next"
@@ -255,6 +255,360 @@ export function onInitialRender(target, args) {
 export const meta = {
  thoughts: "This prompt asks for a styled, Firebase-connected search bar with debouncing, caching, and dynamic result display. The 'onInit' requires styling the input and making the overall search appealing. I will provide a comprehensive solution, focusing on both functionality and visual design. I have now included css styling on the search results to improve the appearence.",
  expect: "The user needs to 1. Install Firebase., 2. Set up Firebase environment variables (NEXT_PUBLIC_API_KEY_P2, NEXT_PUBLIC_AUTH_DOMAIN_P2, NEXT_PUBLIC_PROJECT_ID_P2, NEXT_PUBLIC_STORAGE_BUCKET_P2, NEXT_PUBLIC_MESSAGING_SENDER_ID_P2, NEXT_PUBLIC_APP_ID_P2)., 3. Create a 'products' collection in Firestore with documents having a 'title' field., 4. Include an input element with type="search" in the DOM. Ensure no initial element with id='searchResults' exist, dynamically one will be added by the javascript code at the bottom of the page's body element."
+}
+```
+</HideShowCodeBlock>
+
+## AIForm
+
+### Supabase User Registration Form and Storage operation
+
+**Scenario:**
+
+Create a user registration form that stores user data in a "users" table in Supabase. The form should include fields for username, email, password, and date of birth. Implement email and password validation. Define all fields in the fieldDefinitions array.
+
+<Notes note="also-know">
+`feedback` is used to refine the response in iterative manner.
+</Notes>
+
+```jsx filename="supabaseUserRegistration" copy
+<AIForm
+  cacheResponse={false}
+  feedback="Unexpected token '>'. Be careful while creating strong password logic you should not break the quotes."
+  prompt="Create a user registration form that upload profile pic to '$BUCKET, get download URL and then stores data in the $TABLE table in Supabase"
+  filename="supabaseUserRegistration"
+  listener="onSubmit"
+  styleHint="Clean, modern registration form with clear validation messages."
+  validate="Username, email, password, and date of birth are required. Email must be valid. Password must be at least 8 characters, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+  fieldDefinitions={[
+    {
+      id: "username",
+      fieldDefination: "Username ",
+      type: "text",
+    },
+    {
+      id: "email",
+      fieldDefination: "Email", 
+      type: "email",
+    },
+    {
+      id: "password",
+      fieldDefination:
+        "Password, Create a 'Suggest strong password' button and add onClick which will update this password value with the generated password",
+      styleHint: "Suggest strong password must be below password",
+      type: "password",
+    },
+    {
+      id: "dateOfBirth",
+      fieldDefination: "Date of birth",
+      type: "date",
+      validate: "Use should not be able to select any date in future.",
+    },
+    {
+      id: "profilePic",
+      fieldDefination: "Picture, Create a nice UI to select file",
+      validate: "only .jpg and <100KB",
+      type: "file",
+    },
+  ]}
+  supportingProps={{
+    utils: {
+      $TABLE: "users",
+      $BUCKET: "publicFiles/profile-pictures",
+    },
+    database: {
+      name: "supabase",
+      envGuide:
+        "Use process.env.NEXT_PUBLIC_SUPABASE_URL and process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY for Supabase configuration.",
+    },
+  }}
+/>
+```
+
+<HideShowCodeBlock>
+```js filename="supabaseUserRegistration"
+import "./css/supabaseUserRegistration.css"
+import { createClient } from '@supabase/supabase-js';
+const globals={"isFormBuilt":false,"usernameField":null,"emailField":null,"passwordField":null,"dateOfBirthField":null,"profilePicField":null,"submitButtonRef":null};
+function createElement(tag, props, children) {
+  if (typeof props !== "object") {
+    console.error("props is not an object");
+    return;
+  }
+  const element = document.createElement(tag);
+
+  // Apply properties to the element
+  Object.entries(props).forEach(([key, value]) => {
+    if (key === "className") {
+      element.className = value || "~#$%&&";
+    } else {
+      element[key] = value;
+    }
+  });
+
+  // Append children
+  if (Array.isArray(children)) {
+    children.forEach((child) => {
+      if (child instanceof Node) {
+        element.appendChild(child);
+      }
+    });
+  }
+
+  return element;
+}
+function createFormField(id, label, type) {
+  const fieldContainer = createElement("div", {
+    className: "supabaseUserRegistration-field",
+  });
+
+  const labelElement = createElement("label", {
+    htmlFor: id,
+    textContent: label,
+    className: "supabaseUserRegistration-label",
+  });
+  fieldContainer.appendChild(labelElement);
+
+  let inputElement;
+  if (type === "textarea") {
+    inputElement = createElement("textarea", {
+      id: id,
+      name: id,
+      className: "supabaseUserRegistration-input",
+    });
+  } else {
+    inputElement = createElement("input", {
+      type: type,
+      id: id,
+      name: id,
+      className: "supabaseUserRegistration-input",
+    });
+  }
+  fieldContainer.appendChild(inputElement);
+
+  return fieldContainer;
+}
+function generateStrongPassword() {
+  const length = 12;
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_-+=`~[]{}|;:,.<>/?";
+
+  let password = "";
+  password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+  password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+  password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  password += symbols.charAt(Math.floor(Math.random() * symbols.length));
+
+  const allChars = uppercase + lowercase + numbers + symbols;
+  for (let i = password.length; i < length; i++) {
+    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+  }
+
+  return password
+    .split("")
+    .sort(() => 0.5 - Math.random())
+    .join("");
+}
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+function isStrongPassword(password) {
+  if (password.length < 8) return false;
+  if (!/[A-Z]/.test(password)) return false;
+  if (!/[a-z]/.test(password)) return false;
+  if (!/[0-9]/.test(password)) return false;
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return false;
+  return true;
+}
+function setStatus(message, type) {
+  const statusDiv = document.getElementById(
+    "supabaseUserRegistration-formStatus",
+  );
+  statusDiv.textContent = message;
+  statusDiv.className = `supabaseUserRegistration-formStatus ${type || ""}`;
+}
+function toggleButtonState(disabled, text) {
+  if (globals.submitButtonRef) {
+    globals.submitButtonRef.disabled = disabled;
+    globals.submitButtonRef.textContent = text;
+  }
+}
+
+export default async function main(event, args) {
+  event.preventDefault();
+  setStatus("");
+  toggleButtonState(true, "Registering...");
+
+  const formData = new FormData(event.currentTarget);
+
+  try {
+    const username = formData.get("supabaseUserRegistration-username");
+    const email = formData.get("supabaseUserRegistration-email");
+    const password = formData.get("supabaseUserRegistration-password");
+    const dateOfBirth = formData.get("supabaseUserRegistration-dateOfBirth");
+    const profilePic = formData.get("supabaseUserRegistration-profilePic");
+
+    // Validate form data
+    if (!username || !email || !password || !dateOfBirth || !profilePic) {
+      throw new Error("All fields are required.");
+    }
+
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email address.");
+    }
+
+    if (!isStrongPassword(password)) {
+      throw new Error(
+        "Password must be at least 8 characters, contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      );
+    }
+
+    if (new Date(dateOfBirth) > new Date()) {
+      throw new Error("Date of birth cannot be in the future.");
+    }
+
+    if (profilePic.size > 100 * 1024 || !profilePic.type.includes("jpeg")) {
+      throw new Error("Profile picture must be a JPG file smaller than 100KB.");
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
+
+    // Upload profile picture to Supabase Storage
+    const { data: storageData, error: storageError } = await supabase.storage
+      .from(args.$BUCKET)
+      .upload(`profile-pictures/${username}-${Date.now()}.jpg`, profilePic, {
+        contentType: "image/jpeg",
+      });
+
+    if (storageError) {
+      throw storageError;
+    }
+
+    const profilePicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${args.$BUCKET}/${storageData.path}`;
+
+    // Store user data in Supabase table
+    const { data: tableData, error: tableError } = await supabase
+      .from(args.$TABLE)
+      .insert([
+        {
+          username,
+          email,
+          password,
+          date_of_birth: dateOfBirth,
+          profile_pic_url: profilePicUrl,
+        },
+      ]);
+
+    if (tableError) {
+      throw tableError;
+    }
+
+    setStatus("Registration successful!", "success");
+  } catch (error) {
+    setStatus(`Registration failed: ${error.message}`, "error");
+  } finally {
+    toggleButtonState(false, "Register");
+  }
+}
+
+export function formBuilder(formElement, args) {
+  if (globals.isFormBuilt) return;
+
+  if (!(formElement instanceof HTMLFormElement)) {
+    console.warn("Invalid formElement provided. Expected an HTMLFormElement.");
+    return;
+  }
+
+  const heading = createElement("h1", {
+    textContent: "User Registration",
+    className: "supabaseUserRegistration-heading",
+  });
+
+  formElement.appendChild(heading);
+
+  const statusDiv = createElement("div", {
+    id: "supabaseUserRegistration-formStatus",
+    className: "supabaseUserRegistration-formStatus",
+  });
+
+  formElement.appendChild(statusDiv);
+
+  // Username Field
+  globals.usernameField = createFormField(
+    "supabaseUserRegistration-username",
+    "Username",
+    "text",
+  );
+  formElement.appendChild(globals.usernameField);
+
+  // Email Field
+  globals.emailField = createFormField(
+    "supabaseUserRegistration-email",
+    "Email",
+    "email",
+  );
+  formElement.appendChild(globals.emailField);
+
+  // Password Field and Suggest Strong Password button
+  const passwordContainer = createElement("div", {
+    className: "supabaseUserRegistration-password-container",
+  });
+
+  globals.passwordField = createFormField(
+    "supabaseUserRegistration-password",
+    "Password",
+    "password",
+  );
+  passwordContainer.appendChild(globals.passwordField);
+
+  const suggestPasswordButton = createElement("button", {
+    type: "button",
+    textContent: "Suggest Strong Password",
+    className: "supabaseUserRegistration-suggest-password-button",
+  });
+  suggestPasswordButton.addEventListener("click", () => {
+    globals.passwordField.querySelector("input").value =
+      generateStrongPassword();
+  });
+  passwordContainer.appendChild(suggestPasswordButton);
+
+  formElement.appendChild(passwordContainer);
+
+  // Date of Birth Field
+  globals.dateOfBirthField = createFormField(
+    "supabaseUserRegistration-dateOfBirth",
+    "Date of birth",
+    "date",
+  );
+  formElement.appendChild(globals.dateOfBirthField);
+
+  // Profile Picture Field
+  globals.profilePicField = createFormField(
+    "supabaseUserRegistration-profilePic",
+    "Picture",
+    "file",
+  );
+  formElement.appendChild(globals.profilePicField);
+
+  globals.submitButtonRef = createElement("button", {
+    type: "submit",
+    textContent: "Register",
+    className: "supabaseUserRegistration-submit-button",
+  });
+  formElement.appendChild(globals.submitButtonRef);
+
+  globals.isFormBuilt = true;
+}
+
+export const meta = {
+ thoughts: "This prompt requests a user registration form that uploads a profile picture to a Supabase bucket, retrieves the download URL, and stores the data in a Supabase table. The form includes fields for username, email, password (with a 'Suggest strong password' button), date of birth, and profile picture. Validations are specified for required fields, email format, password strength, date of birth (no future dates), and profile picture (only .jpg and <100KB).",
+ expect: "The user must have the Supabase package installed. Environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set. A 'users' table must exist in Supabase with columns matching the fields. A storage bucket named 'publicFiles/profile-pictures' must also exist."
 }
 ```
 </HideShowCodeBlock>

@@ -73,6 +73,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   @apply text-black bg-white dark:text-white dark:bg-black;
 }
+.nextra-search {
+  display: none !important;
+}
 
 .normal-btn {
   @apply text-white bg-black dark:text-black dark:bg-white;
