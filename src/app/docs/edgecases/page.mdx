@@ -1,0 +1,252 @@
+import { aiComponentNames } from "@/utils/utils"
+import CodeBlock from "@components/CodeBlock"
+import Notes from "@components/Note"
+import HideShowCodeBlock from "@components/HideShowCodeBlock"
+
+# Edge Cases and Troubleshooting
+While **Intelligent React Components** aims to make AI-powered development seamless, there are certain edge cases and scenarios that require special attention. This guide covers common challenges and provides solutions to ensure your components work as expected.
+
+## Prompt Engineering
+### Ambiguous Prompts
+**Problem:** The AI generates code that doesn't match your intentions.
+
+**Solution:**
+
+- Be specific about the desired behavior
+- Specify input/output formats
+- Include error handling expectations
+- Mention edge cases explicitly
+
+```jsx {3,11-14}
+// ❌ Ambiguous
+<AIInput 
+  prompt="Validate phone numbers"
+  filename="phoneValidator"
+  listener="onChange"
+  type="text"
+/>
+
+// ✅ Specific
+<AIInput
+  prompt="Validate US phone numbers in format (XXX) XXX-XXXX or XXX-XXX-XXXX. 
+          Show error if invalid. Allow typing with automatic formatting. 
+          Handle partial input gracefully."
+  filename="phoneValidator"
+  listener="onChange"
+  type="text"
+/>
+```
+
+## Incomplete Prompts
+### Missing Prompt
+**Problem:** Component fails to generate code due to missing prompt.
+
+**Solution:**
+
+- Always provide a prompt property
+- Ensure prompt is descriptive enough for the AI to understand
+
+```jsx
+// ❌ Missing prompt
+<AIButton
+  filename="dataFetcher"
+  listener="onClick"
+  label="Fetch Data"
+>
+```
+<HideShowCodeBlock>
+```json {3-8}
+{
+  "thoughts": "The provided JSON is missing the `prompt` key, which is required to determine the functionality of the event listener. Without a prompt, I cannot generate the JavaScript code.",
+  "error": {
+    "message": "Missing required keys in JSON input.",
+    "status": 400,
+    "details": "The following keys are missing: prompt.",
+    "code": "MISSING_KEYS"
+  },
+  "response": {},
+  "expect": ""
+}
+```
+</HideShowCodeBlock>
+
+### Vague Prompt
+**Problem:** AI generates incorrect or suboptimal code due to vague instructions.
+**Solution:**
+
+- Include specific details about operation
+
+```jsx
+// ❌ Vague prompt
+<AIInput
+  prompt="Check if valid"
+  filename="validator"
+  listener="onChange"
+  type="text"
+/>
+```
+<HideShowCodeBlock>
+```json {1-6}
+{
+  "error": {
+    "message": "Prompt is ambiguous or incomplete.",
+    "status": 400,
+    "details": "The prompt is not clear about what needs to be checked for validity. Please specify what validation needs to be performed on the input.",
+    "code": "AMBIGUOUS_PROMPT"
+  }
+}
+```
+</HideShowCodeBlock>
+
+### Invalid Utils, Callbacks, or Mutations
+**Problem:** Component fails due to improperly formatted supporting properties.
+
+**Solution:**
+
+- Ensure utils keys exists.
+- Verify callback functions are properly defined
+- Check mutation types and return formats
+
+
+```jsx
+// ❌ Invalid utils reference
+<AIButton
+  prompt="Fetch data from API and update state"
+  filename="apiHandler"
+  listener="onClick"
+  label="Fetch Data"
+  supportingProps={{
+    utils: {
+      API_URL: "https://api.example.com" // invalid key
+    }
+  }}
+  // no mutation
+/>
+```
+
+<HideShowCodeBlock>
+```json
+{
+    "error": {
+        "message": "Missing information for the action",
+        "status": 400,
+        "details": "What state needs to be updated upon fetching the data, and where is the mutation callback located?",
+        "code": "MISSING_INFO"
+    },
+}
+```
+</HideShowCodeBlock>
+<Notes note="good-to-know">
+    Prefix utils with `$`, mutation with `&` and variables with `_` for better processing.
+</Notes>
+
+### Missing Utils, Callbacks, or Mutations
+**Problem:** Component doesn't work as expected because required supporting properties are missing.
+
+**Solution:**
+
+- Ensure all placeholders in prompts have corresponding entries in utils
+- Provide all callbacks mentioned in the prompt
+- Include mutation objects for any state changes
+
+```jsx
+// ❌ Missing referenced utils
+<AIButton
+  prompt="When clicked, fetch data from $API_ENDPOINT and update _userList"
+  filename="fetchUsers"
+  listener="onClick"
+  label="Fetch"
+  // Missing supportingProps with $API_ENDPOINT and _userList
+>
+```
+
+<HideShowCodeBlock>
+```json
+{
+    "error": {
+    "message": "Missing required variables and utils",
+    "status": 400,
+    "details": "The variables '$API_ENDPOINT' (utils) and '_userList' (variables) are referenced in the prompt but are not defined in supportingProps.",
+    "code": "MISSING_VARIABLES"
+  }
+}
+```
+</HideShowCodeBlock>
+
+
+## Performance Considerations
+### Heavy Computations
+**Problem:** AI-generated code performs computationally expensive operations.
+
+**Solution:**
+
+- Specify performance constraints in your prompt
+- Consider debouncing inputs in your prompts
+- Consider asking for caching to avoid repetive requests
+
+<CodeBlock options={["AIInput","AIButton"]}>
+```jsx /debounce/ /300ms/
+<AIInput
+  prompt="Validate this email but debounce input by 300ms to avoid 
+          performance issues during rapid typing"
+  filename="efficientEmailValidator"
+  listener="onChange"
+  type="email"
+/>
+```
+```jsx /cache/
+<AIButton
+  prompt="fetch products from firebase and cache each valid search param"
+  filename="fetchProducts"
+  listener="onClick"
+/>
+```
+</CodeBlock>
+
+### Large Response Generation
+**Problem:** Complex prompts lead to large generated files.
+
+**Solution:**
+
+- Be specific about code organization in your prompts
+- Avoid requesting "comprehensive" solutions without specifying limits.
+
+## Server Connection Issues
+### Server Not Running
+**Problem:** Components fail with network errors.
+**Solution:**
+
+- Ensure the local server is running (npm run server)
+- ensure you have added the [`server script`](./getting-started/initializing#add-server-script)
+Check terminal for server errors
+- Verify port availability (5173).
+
+<Notes note="avoid">
+Currently there is no implementation to use custom `PORT` you must ensure that `5173` is available.
+</Notes>
+
+### Authentication Errors
+**Problem:** AI API calls fail with auth errors.
+
+**Solution:**
+
+- Verify your Gemini API key is correctly set in [environment variables](./getting-started/installation#setting-up-gemini-api)
+- Check API key permissions and quotas
+
+## Troubleshooting Process
+
+1. **Check DevTools:** Enable DevTools to see prompts, responses, and errors
+2. **Inspect Generated Code:** View the generated files in your project's `.dynamic` directory
+3. **Simplify:** Test with simpler prompts to isolate issues
+4. **Feedback Loop:** Use the feedback property to refine outputs based on previous results
+
+```jsx {5-6}
+<AIButton
+  prompt="Calculate total price including tax"
+  filename="priceCalculator"
+  listener="onClick"
+  feedback="The previous version didn't handle decimal places correctly. 
+            Please round to 2 decimal places and format with currency symbol."
+  label="Calculate Price"
+/>
+```

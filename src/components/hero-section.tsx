@@ -37,7 +37,7 @@ export default function HeroSection() {
   }, [controls]);
 
   // Words for the typing effect
-  const words = ["Elements", "Validation", "Layouts", "Flows"];
+  const words = ["Generate", "Command", "Create", "Refine"];
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
   // Change word every 2 seconds
@@ -119,8 +119,8 @@ export default function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.8 }}
         >
-          <span>Describe</span>
-          <div className="relative py-3   bg-white dark:bg-gray-900  px-3 rounded-full overflow-hidden">
+          <span>Describe.</span>
+          <div className="relative py-3 text-white dark:text-black bg-gradient-to-br from-[#489EEC] to-[#61DAFB] px-3 rounded-full overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.span
                 key={currentWordIndex}
@@ -130,7 +130,7 @@ export default function HeroSection() {
                 transition={{ duration: 0.3 }}
                 className="text-primary inline-block min-w-32 text-center"
               >
-                {words[currentWordIndex]}
+                {words[currentWordIndex]}.
               </motion.span>
             </AnimatePresence>
           </div>
