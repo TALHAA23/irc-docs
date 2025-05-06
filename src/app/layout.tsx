@@ -11,7 +11,17 @@ export const metadata = {
 };
 const banner = (
   <Banner storageKey="some-key">
-    City University of science and information technology
+    <div className="flex items-center justify-between">
+      <div className="flex justify-center items-center gap-2">
+        <Image
+          className="w-[20px] aspect-square"
+          src="/flag-for-palestinian-territories-svgrepo-com.svg"
+          alt="palestine-flag"
+        />
+        <p className=" opacity-80">Peace for Palestine</p>
+      </div>
+      <div>CUSIT</div>
+    </div>
   </Banner>
 );
 
