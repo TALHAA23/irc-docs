@@ -1,6 +1,6 @@
 // irc.config.js
 module.exports = {
-  PORT: 5173, //number
+  PORT: 7070, //number
   geminiConfig: {
     /* 
     - gemini-1.5-flash 

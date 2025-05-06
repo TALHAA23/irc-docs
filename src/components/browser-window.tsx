@@ -27,7 +27,6 @@ export default function BrowserWindow({ title, children }: BrowserWindowProps) {
 
         {/* Browser controls */}
         <div className="flex items-center space-x-4 text-gray-500">
-          <div className="w-4 h-4 rounded-sm border border-gray-300"></div>
           <div className="w-4 h-4 text-lg font-thin">×</div>
         </div>
       </div>
@@ -37,7 +36,8 @@ export default function BrowserWindow({ title, children }: BrowserWindowProps) {
         <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 px-3 py-1">
           <div className="w-4 h-4 bg-gray-200 rounded-full mr-2"></div>
           <div className="text-xs text-gray-500 truncate flex-1">
-            https://example.com/{title.toLowerCase().replace(/\s+/g, "-")}
+            https://react-genai/showcase/
+            {title.toLowerCase().replace(/\s+/g, "-")}
           </div>
         </div>
       </div>

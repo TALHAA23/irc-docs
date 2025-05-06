@@ -5,6 +5,7 @@ import "nextra-theme-docs/style.css";
 import "./globals.css";
 import React from "react";
 import Logo from "@/components/Logo";
+import { keywords } from "@/utils/utils";
 export const metadata = {
   title: "IRC",
 };
@@ -46,7 +47,9 @@ const footer = (
         />
       </Link>
     </p>
-    <p>MIT {new Date().getFullYear()} © IRC.</p>
+    <p>
+      MIT {new Date().getFullYear()} © {keywords.pkgname}.
+    </p>
   </Footer>
 );
 

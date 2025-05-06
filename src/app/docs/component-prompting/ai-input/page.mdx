@@ -1,0 +1,225 @@
+# Prompt Engineering for Input: A Guide to Getting the Code You Need
+
+This blog post provides guidance on how to effectively prompt a code generation model (like me!) particularly for HTML input elements. By following these guidelines, you can significantly improve the quality and accuracy of the generated code, saving you time and effort.
+
+## Understanding the Goal: Precise and Context-Aware Code
+
+The goal is to provide enough information so the model can generate a concise, efficient, and well-documented JavaScript event listener function tailored to your specific needs. This includes specifying the event type, input type (if applicable), desired behavior, and any external dependencies.
+
+## The Core Elements of a Good Prompt
+
+A well-structured prompt should include the following key elements:
+
+1.  **`listener` (Required):**  The type of event you want to listen for. Common examples include:
+
+    *   `onChange`:  When the value of an input changes.
+    *   `onInput`:  When the user types in an input field.
+    *   `onFocus`:  When an element gains focus.
+    *   `onBlur`:  When an element loses focus.
+    *   `onSubmit`: When a form is submitted.
+        *   `onClick`: When a button is clicked
+
+    **Do:** `"listener": "onChange"`
+    **Don't:** `"event": "change"` (Incorrect key name)
+
+2.  **`type` (Required for Input Elements):** The type of HTML input element you're working with.  This helps tailor the generated code. Examples:
+
+    *   `text`:  Standard text input.
+    *   `password`:  Password input.
+    *   `email`:  Email input.
+    *   `checkbox`:  Checkbox input.
+    *   `file`: File upload input
+
+    **Do:** `"type": "email"`
+    **Don't:** `"type": "number"` (If you intend to process number input as text in the event listener). Specify `"type": "text"` and handle parsing in your prompt.
+
+3.  **`prompt` (Required):** The core logic you want the event listener to perform. This should be a clear and concise description of the desired behavior.
+
+    **Do:** `"prompt": "Display an alert box if the input is empty."`
+    **Don't:** `"prompt": "Do something when the input changes."` (Too vague)
+
+## Enhancing Your Prompts: Supporting Data
+
+To generate more sophisticated event listeners, you can provide additional context through the following optional fields:
+
+1.  **`supportingProps` (Optional):**  An object containing variables, utility functions, and parameters accessible within the `prompt`.
+
+    *   **`variables`:**  Key-value pairs representing variables. Use a prefix like `_` to reference them in the `prompt` (e.g., `_maxLength`).
+    *   **`utils`:** Key-value pairs representing utility functions (usually strings containing code).  Use a prefix like `$` to reference them in the `prompt` (e.g., `$formatDate`).
+        *   **`parameters`**: Key-value pairs of data to pass.
+
+    **Do:**
+
+    ```json
+    "supportingProps": {
+      "variables": {
+        "_maxLength": 10
+      },
+      "utils": {
+        "$formatDate": "function formatDate(date) { ... }"
+      }
+    }
+    ```
+
+    **Don't:**
+
+    ```json
+    "supportingProps": {
+      "maxLength": 10  // Missing the `_` prefix, so it cannot be referenced in the prompt.
+    }
+    ```
+
+2.  **`mutation` (Optional):**  An array of objects describing mutation operations to be performed within the event listener (e.g., updating state variables). Each object should have an `id`, `returnFormat`, and `mutate` field. Use a prefix like `&` to reference them in the `prompt` (e.g., `&updateValue`).
+
+    **Do:**
+
+    ```json
+    "mutation": [
+      {
+        "id": "updateValue",
+        "returnFormat": "string",
+        "mutate": "setValue"
+      }
+    ]
+    ```
+
+    **Don't:**
+
+    ```json
+    "mutation": [
+      {
+        "name": "updateValue", // Incorrect key - should be "id"
+        "type": "string" // Incorrect key - should be "returnFormat"
+      }
+    ]
+    ```
+
+3.  **`callbacks` (Optional):**  An object containing independent and dependent callbacks.
+
+    *   **`independent`**: Callbacks that don't require parameters.
+    *   **`dependent`**: Callbacks that require parameters.  Specify the `parametersGuide` to instruct the model how to pass parameters.
+
+    **Do:**
+
+    ```json
+    "callbacks": {
+      "dependent": [
+        {
+          "callback": "validatePasswordStrength",
+          "callGuide": "Call this function to validate password strength when the length exceeds the minimum length.",
+          "parametersGuide": [
+            "Pass the input value",
+            "Pass the validation criteria array"
+          ]
+        }
+      ]
+    }
+    ```
+
+    **Don't:**
+
+    ```json
+    "callbacks": {
+      "dependent": [
+        {
+          "callback": "validatePasswordStrength" // Missing parametersGuide - unclear how to call the function.
+        }
+      ]
+    }
+    ```
+
+4. **`onInit` (Optional):** A string defining initialization logic for the input element, executed on the first render.
+
+    *  This allows setting default values, styles, or behaviors. Make sure the `prompt` in `onInit` is clear and actionable.
+
+    **Do:**
+
+    ```json
+    "onInit": "Set placeholder to 'Enter your text here' and add a yellow background color."
+    ```
+
+    **Don't:**
+
+    ```json
+    "onInit": "Initialize" // vague and not actionable
+    ```
+
+## Best Practices for Prompt Engineering
+
+*   **Be Specific:** Clearly define the desired behavior of the event listener. Avoid ambiguity.
+*   **Use Keywords:** Use keywords that indicate database operations (e.g., `fetch`, `insert`, `update`, `delete`) or DOM manipulation (e.g., `change the text content`, `add a CSS class`).
+*   **Provide Examples:** If possible, provide examples of the expected input and output.
+*   **Test and Refine:** After generating the code, test it thoroughly and refine your prompt based on the results.
+*   **Remember the `args` Object:** User-defined elements (variables, utilities, mutations, and callbacks) will be passed to the generated function via the `args` object. Access them like `args._myVariable`, `args.$myUtility()`, or `args.myCallback()`.
+
+## Things to Avoid
+
+*   **Unclear Prompts:** Prompts that are too vague or ambiguous will result in poorly generated code.
+*   **Missing Information:** Ensure you provide all necessary information, such as variable values, utility function definitions, and callback signatures.
+*   **Incorrect Syntax:** Double-check your JSON syntax to avoid errors.
+*   **Assuming Default Behavior:** Be explicit about what you want the code to do, even if you think it's obvious.
+
+## Examples
+
+Let's look at some examples of good and bad prompts:
+
+**Example 1: Validating Email Input**
+
+*   **Good Prompt:**
+
+    ```json
+    {
+      "listner": "onBlur",
+      "type": "email",
+      "prompt": "Display an error message if the email is not valid. Use the utility function '$validateEmail' to perform the validation.",
+      "supportingProps": {
+        "utils": {
+          "$validateEmail": "function validateEmail(email) { return /^[\\w.-]+@[\\w-]+\\.[\\w-]{2,4}$/.test(email); }"
+        }
+      }
+    }
+    ```
+
+*   **Bad Prompt:**
+
+    ```json
+    {
+      "listner": "onBlur",
+      "type": "email",
+      "prompt": "Validate the email." // Not specific enough.  How should it validate?  What should happen if it's invalid?
+    }
+    ```
+
+**Example 2: Updating a State Variable**
+
+*   **Good Prompt:**
+
+    ```json
+    {
+      "listner": "onChange",
+      "type": "text",
+      "prompt": "Update the state variable '_charCount' with the length of the input text.",
+      "supportingProps": {
+        "variables": {
+          "_charCount": 0
+        }
+      },
+      "mutation": [
+        {
+          "id": "updateCharCount",
+          "returnFormat": "number",
+          "mutate": "setCharCount"
+        }
+      ]
+    }
+    ```
+
+*   **Bad Prompt:**
+
+    ```json
+    {
+      "listner": "onChange",
+      "type": "text",
+      "prompt": "Update the character count." // Not specific about which variable to update or how.
+    }
+    ```

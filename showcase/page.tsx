@@ -1,30 +1,25 @@
 "use client";
-
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CopyIcon } from "lucide-react";
 import BackgroundAnimation from "@/components/playground-background-animation";
 import BrowserWindow from "@/components/browser-window";
+import MiniAppTodo from "./_mini_applications/todos";
+import JSONViewer from "@/components/JSONViewer";
+import { Image } from "nextra/components";
 import { AIButton } from "intelligent-react-components";
+import { UnionType } from "@/utils/utils";
+
 export default function ShowcasePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentJSON, setCurrentJSON] = useState<UnionType>(null);
 
   // This array will contain your showcase windows
   // You can replace the placeholder content with your React library components
   const showcaseItems = [
     {
       id: 1,
-      title: "Component Demo 1",
-      content: (
-        <div className="bg-white h-full w-full text-black p-3">
-          <h1 className="text-8xl">
-            <AIButton
-              prompt="greet upon click"
-              filename="greet"
-              listener="onClick"
-            />
-          </h1>
-        </div>
-      ),
+      title: "Todo list",
+      content: <MiniAppTodo setJSON={setCurrentJSON} />,
     },
     {
       id: 2,
@@ -37,6 +32,11 @@ export default function ShowcasePage() {
       content: (
         <div className="bg-white h-full w-full">
           {/* Your library component will go here */}
+          <AIButton
+            filename="sayCongrats"
+            listener="onClick"
+            prompt="Upon click, Console Congrats and create a pop party in the DOM."
+          />
         </div>
       ),
     },
@@ -58,6 +58,21 @@ export default function ShowcasePage() {
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Animated background */}
       <BackgroundAnimation />
+      {currentJSON && (
+        <div className=" fixed w-full max-w-[400px] h-full top-0 right-0 z-30 bg-white rounded-l p-2 overflow-y-auto">
+          <h1 className="text-black font-bold">Input JSON</h1>
+          <div className="flex justify-end gap-2 my-1">
+            <CopyIcon className=" text-black" />
+            <Image
+              src="/cross-icon.svg"
+              alt="hide"
+              className="w-[20px] aspect-square"
+              onClick={() => setCurrentJSON(null)}
+            />
+          </div>
+          <JSONViewer props={currentJSON} />
+        </div>
+      )}
 
       {/* Main content container with padding */}
       <div className="relative z-10 min-h-screen w-full p-4 md:p-6 flex flex-col items-center justify-center">

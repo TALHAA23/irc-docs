@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { Copy, Check, Sparkles, Zap, Code, Braces } from "lucide-react";
+import { keywords } from "@/utils/utils";
 
 export default function HeroSection() {
   const [copied, setCopied] = useState(false);
@@ -46,7 +47,7 @@ export default function HeroSection() {
       setCurrentWordIndex((prev) => (prev + 1) % words.length);
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [words.length]);
 
   return (
     <section
@@ -150,7 +151,7 @@ export default function HeroSection() {
               className="font-mono text-lg px-8 py-3.5 flex items-center gap-2"
               onClick={copyToClipboard}
             >
-              <span className="text-primary">$</span> npm i irc
+              <span className="text-primary">$</span> npm i {keywords.pkgname}
               <button
                 className="ml-2 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label={copied ? "Copied!" : "Copy to clipboard"}

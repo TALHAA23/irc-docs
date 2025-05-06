@@ -1,0 +1,101 @@
+# Prompt Engineering for Effective Form Generation: A Guide
+
+Here's what the `AIForm` is telling you!
+
+Hi! I'm here to help you build amazing forms, but I need your help too! The clearer and more specific your instructions are, the better I can understand your needs and deliver a form that's just right. Here's a guide on how to prompt me effectively:
+
+**1. Be Specific About the Form's Purpose**
+
+*   **Do:** Start with the main goal of the form. Tell me what it's for.
+
+    *   Example: 'Create a contact form for a website' or 'Build a registration form for a conference.'
+*   **Don't:** Be vague. Avoid prompts like 'Make a form' without specifying its objective.
+
+**2. Clearly Define Each Field**
+
+*   **Do:** Be explicit about each field you need. Include:
+
+    *   **Label:** What should the user see next to the field?
+    *   **Type:** Is it text, email, number, a dropdown, a checkbox, a file upload?
+    *   **Validation:** What rules should apply (required, valid email, minimum length, etc.)?
+    *   **Example:** 'A field for 'Full Name' (text, required), an 'Email Address' field (email, required, valid email format), a 'Message' field (textarea)'
+
+*   **Don't:** Just say 'Include a name field' without specifying the type or validation.
+
+**3. Give Context for Layout and Styling**
+
+*   **Do:** Provide guidance on how the form should look and be arranged.
+
+    *   **Layout:** 'One-column layout', 'Two-column layout', or descriptions like 'Name and email side-by-side.'
+    *   **Style Hints:** 'Modern design', 'Use Material Design', or 'Clean, professional look with subtle borders.'
+    *   **Color Palette:** If you have specific colors in mind, list them (e.g., 'Use this color palette: #FFA725, #FFF5E4, #C1D8C3').
+
+*   **Don't:** Leave it entirely up to me without any stylistic direction.
+
+**4. Handling Multi-Step Forms**
+
+*   **Do:** Clearly outline the steps, titles, fields in each step, and descriptions.
+
+    *   Example:
+
+    ```
+    Multi-step form with:
+    Step 1: "Personal Information" (fields: name, email, phone)
+    Step 2: "Address" (fields: address, city, postal code)
+    Step 3: "Preferences" (fields: newsletter, interests)
+    ```
+
+*   **Don't:** Assume I'll know the best way to divide the form without instructions.
+
+**5. Database Integration**
+
+*   **Do:** If the form interacts with a database, specify:
+
+    *   **Database Type:** 'Firebase', 'Supabase', etc.
+    *   **Collection/Table Name:** 'Insert data into the 'users' table.'
+    *   **Environment Variables:** Instructions like 'Use NEXT\_PUBLIC\_SUPABASE\_URL and NEXT\_PUBLIC\_SUPABASE\_ANON\_KEY.'
+    *   **Data Handling:** 'Calculate salePrice by applying the discount to the original price'
+
+*   **Don't:** Just say 'Connect to a database' without details.
+
+**6. Dynamic Behavior and Dependencies**
+
+*   **Do:** Explain any dynamic changes:
+
+    *   'If 'Round Trip' is selected, show the return date field.'
+    *   'Enable the 'Last Name' field only if the 'First Name' field is filled.'
+
+*   **Don't:** Expect me to infer complex logic without being told.
+
+**7. Understand My Key Words**
+
+*   `fetch`: Indicates fetching data from the database.
+*   `insert`: Indicates inserting data into the database.
+*   `update`: Indicates updating data in the database.
+*   `delete`: Indicates deleting data from the database.
+
+**8. Examples of Good and Bad Prompts**
+
+*   **Bad:** 'Create a form for users.' (Too vague)
+*   **Good:** 'Create a user registration form with fields for 'First Name' (text, required), 'Last Name' (text, required), 'Email Address' (email, required, valid email format), and 'Password' (password, required, minimum 8 characters). Use a clean, modern design.'
+
+*   **Bad:** 'Make a multi-step form.' (Lacks details)
+*   **Good:** 'Create a 2-step form. Step 1: 'Personal Info' (fields: name, email). Step 2: 'Preferences' (fields: newsletter, interests). Validate each step.'
+
+**9. Key Things to Remember**
+
+*   **type:** Enums which indicate what type of HTML tag the form field should have for every field.
+*   **filename:** This tag determines the general style of the component and to prevent CSS collisions.
+*   Be aware of keys like multiStep, fieldDefinitions, and listener and how they interact. The more you utilize them the better I can interpret your requirements.
+
+**10. What About Me?**
+
+*   `helperFunction`: A function which needs the use in main function.
+*   `globals`: if a variable is in formBuilder and needs to use later always save to global.
+*   `CSS`: proper style following conventions.
+
+By following these guidelines, you'll be able to write prompts that allow me to generate exactly the form you need!
+
+***
+
+By following these prompt engineering, you will get a well structured code. The better the prompt, the more effective response.

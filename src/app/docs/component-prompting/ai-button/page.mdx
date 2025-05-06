@@ -1,0 +1,199 @@
+# Crafting the Perfect Prompt: A Guide to Getting the Best AIButton
+
+I'm designed to generate Buttons and required functions based on your instructions. The clearer and more detailed your instructions are, the better the resulting code will be. This guide provides tips and examples to help you write effective prompts.
+
+**Key Principles:**
+
+1.  **Be Specific:** The more details you provide, the better I can understand your intent. Don't be afraid to be verbose!
+2.  **Use Keywords:**  I recognize certain keywords that trigger specific behaviors (see list below). Use them intentionally.
+3.  **Structure Your Prompts:** Follow the JSON format meticulously. Missing keys or incorrect data types will lead to errors.
+4.  **Leverage Supporting Props:** Use `supportingProps`, `mutation`, and `callbacks` to provide context and external data.
+5.  **Think Step-by-Step:** Break down complex tasks into smaller, logical steps.
+
+**JSON Structure (Reminder):**
+
+```json
+{
+  "listener": "event_type",
+  "prompt": "description of the event listener's behavior",
+  "supportingProps": { /* optional context */ },
+  "mutation": [ /* optional state updates */ ],
+  "callbacks": { /* optional functions to call */ },
+   "onInit": "Optional intilization of button"
+}
+```
+
+**Detailed Breakdown:**
+
+*   **`listener`:** (Required)
+    *   This field *must* contain a valid HTML event listener type (e.g., `"click"`, `"mouseover"`, `"keydown"`).
+    *   **Do:** `"click"`, `"mouseover"`, `"keydown"`, `"change"`
+    *   **Don't:** `"on_click"`, `"a click"`, `"when clicked"`
+    *   *Example:* `"listener": "click"`
+
+*   **`prompt`:** (Required)
+    *   This is the core instruction. Clearly describe what the event listener should do.
+    *   *Example:* `"prompt": "Display an alert box with the message 'Button clicked!'"`
+    *   *Example:* `"prompt": "Change the text content of the paragraph with the ID 'myParagraph' to 'Text changed!'"`
+    *   **Do:**
+        *   Use imperative verbs: "Display", "Change", "Add", "Remove", "Fetch", "Update".
+        *   Specify target elements using IDs or classes.
+        *   Describe the desired outcome clearly.
+        *   If database interactions, define what data and what operation you'd like.
+    *   **Don't:**
+        *   Be vague: "Do something when the button is clicked."
+        *   Use ambiguous language.
+        *   Omit important details.
+
+*   **`supportingProps`:** (Optional, but often crucial)
+    *   This object provides context for the `prompt`.  It contains:
+        *   `variables`:  Key-value pairs of variables you want to use in your `prompt`.  Reference them using the `_` prefix (e.g., `_userName`).
+            *   *Example:* `"variables": { "_userName": "John Doe", "_threshold": 25 }`
+        *   `utils`:  Key-value pairs of utility strings.  Reference them using the `$` prefix (e.g., `$apiEndpoint`). These are usually strings.
+            *   *Example:* `"utils": { "$apiEndpoint": "https://example.com/api", "$adminLevel": "5" }`
+        *   `database`: Use this to pass db context
+            *  `name`: type of database to use, support: "firebase", "supabase"
+            *  `envGuide`: where to find db keys "Use NEXT_PUBLIC" means the key `apiKey` is `NEXT_PUBLIC_apiKey`
+                *   *Example:* `"database": { "name": "firebase", "envGuide": "Use NEXT_PUBLIC at start" }`
+    *   **Do:**
+        *   Define *all* variables and utilities referenced in your `prompt`.  I can't guess what they are!
+        *   Use descriptive names for keys.
+        *   Provide the correct data types for values.
+    *   **Don't:**
+        *   Leave variables undefined.
+        *   Use the wrong data types (e.g., a string where a number is expected).
+        *   Confuse variables and utilities.
+
+*   **`mutation`:** (Optional, but important for state management)
+    *   An array of objects that define state update operations. Each object requires an `id` and `returnFormat`.
+    *   `id`: A unique identifier for the mutation. Reference it in your `prompt` using the `&` prefix (e.g., `&updateCounter`).
+    *   `returnFormat`: The expected data type of the updated value (e.g., `"number"`, `"string"`, `"boolean"`).
+    *   `mutationType`: ("assignment", "callback")
+        * assignment = its a variable
+        * callback = its a function that accept 1 argument
+    *   *Example:*
+        ```json
+        "mutation": [
+          {
+            "id": "updateCounter",
+            "returnFormat": "number",
+             "mutationType": "callback"
+          }
+        ]
+        ```
+    *   **Do:**
+        *   Define all mutations referenced in your `prompt`.
+        *   Use descriptive IDs.
+        *   Specify the correct `returnFormat`.
+        *   If `id` start with "set" such as "setCounter", I assume to assign instead to callback
+    *   **Don't:**
+        *   Leave mutations undefined.
+        *   Use incorrect `returnFormat` values.
+
+*   **`callbacks`:** (Optional)
+    *   An object containing `independent` and `dependent` callbacks.
+    *   `independent`: An array of objects, each defining a callback function to be called without any parameters.
+        *   `callback`: The name of the callback function. Reference it in your `prompt` directly.
+        *   `callGuide`: Instruction to when to call the callback
+        *   *Example:*
+            ```json
+            "independent": [
+              {
+                "callback": "myCallback",
+                "callGuide": "Call this callback when the button is clicked"
+              }
+            ]
+            ```
+    *   `dependent`:  An array of objects, each defining a callback function that requires parameters.
+        *   `callback`: The name of the callback function.
+        *   `parametersGuide`:  An array describing the parameters to pass to the callback.
+        *    `callGuide`: Instruction to when to call the callback
+        *   *Example:*
+            ```json
+            "dependent": [
+              {
+                "callback": "updateProfile",
+                "parametersGuide": [
+                  "Pass the userId",
+                  "Pass 'success' if userLevel >= adminLevel, otherwise pass 'failed'"
+                ]
+                 "callGuide": "After checking the user level"
+              }
+            ]
+            ```
+    *   **Do:**
+        *   Define all callbacks referenced in your `prompt`.
+        *   Provide clear `parametersGuide` for dependent callbacks.
+        *   Accurately describe when each callback should be called.
+    *   **Don't:**
+        *   Leave callbacks undefined.
+        *   Omit `parametersGuide` for dependent callbacks.
+        *   Provide ambiguous or incorrect instructions on when to call callbacks.
+
+*   **`onInit`:** (Optional)
+    *   A string describing initialization logic for the button.
+    *   *Example:* `"onInit": "Disable the button and set its text to 'Loading...'"`
+    *   If string, I create `onInitialRender` that accept `target` DOM as first argument and `args` as the second.
+    *   **Do:**
+        *   Describe initialization steps clearly and concisely.
+        *   Reference variables from `supportingProps.variables` where needed.
+    *   **Don't:**
+        *   Be ambiguous or unclear.
+
+**Database Interaction Keywords:**
+
+*   `fetch`:  Retrieve data from the database.
+*   `insert`: Add new data to the database.
+*   `update`: Modify existing data in the database.
+*   `delete`: Remove data from the database.
+
+    *   **Do:**
+        *   Specify the criteria for selecting data (e.g., "fetch user with ID 123").
+        *   Provide the data to be inserted or updated (e.g., "insert a new user with name John Doe and age 30").
+        *   Include necessary error handling logic.
+        *   Define database in `supportingProps.database` with all its guide.
+    *   **Don't:**
+        *   Omit selection criteria or data details.
+        *   Forget error handling.
+
+**Examples (Do vs. Don't):**
+
+*   **Poor Prompt:** `"Change the text."` (Vague - what element? What text?)
+*   **Good Prompt:** `"Change the text content of the paragraph with the ID 'myParagraph' to 'Hello, world!'"` (Specific and clear)
+
+*   **Poor Prompt:** `"Call the callback."` (Which callback? When?)
+*   **Good Prompt:**
+    ```json
+    {
+      "prompt": "Call the callback function 'myCallback' when the button is clicked",
+      "callbacks": {
+        "independent": [
+          {
+            "callback": "myCallback",
+            "callGuide": "When the button is clicked"
+          }
+        ]
+      }
+    }
+    ```
+
+*   **Poor Prompt:** `"Update something with the mutation."` (What? How?)
+*   **Good Prompt:**
+    ```json
+    {
+      "prompt": "Set the value of mutation '&counter' to 10",
+      "mutation": [
+        {
+          "id": "counter",
+          "returnFormat": "number"
+        }
+      ]
+    }
+    ```
+
+**Things I Assume:**
+
+*   **DOM Elements Exist:** I assume that any DOM elements you reference (e.g., using IDs) already exist in the HTML.
+*   **Environment Variables are Set:** For database interactions, I assume that the necessary environment variables (API keys, database URLs, etc.) are already configured.
+*   **Libraries are Imported:**  I add imports to the `"imports"` array, but you need to ensure these libraries are included in your project.
+

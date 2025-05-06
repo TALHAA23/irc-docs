@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, Code, Lightbulb } from "lucide-react";
+import { keywords } from "@/utils/utils";
 
 export default function DocsCTA() {
   return (
@@ -112,7 +113,7 @@ export default function DocsCTA() {
                       from
                     </span>{" "}
                     <span className="text-green-600 dark:text-green-400">
-                      irc
+                      {keywords.pkgname}
                     </span>
                   </div>
 

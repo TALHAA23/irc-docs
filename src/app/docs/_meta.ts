@@ -6,6 +6,7 @@ const meta: MetaRecord = {
   components: "IRC Components",
   properties: "Properties",
   devtools: "Devtool",
+  ["component-prompting"]: "Component Prompting",
   edgecases: "Edge Cases and Troubleshooting",
 };
 
